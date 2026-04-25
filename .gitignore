@@ -1,0 +1,83 @@
+# ─── Dependencies ───────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ─── Next.js build output ───────────────────────────────────
+.next/
+out/
+build/
+dist/
+
+# ─── Production / deploy ────────────────────────────────────
+.vercel
+.netlify
+.turbo
+
+# ─── Testing ────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ─── Environment variables ──────────────────────────────────
+# Never commit secrets. Even though VoiceVault is fully on-device,
+# keep this strict in case anyone adds an API key later.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# ─── Logs ───────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ─── TypeScript ─────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── transformers.js / ML model cache ───────────────────────
+# Models are downloaded to the user's browser cache, not your repo,
+# but if anyone runs scripts that pre-download them locally these
+# directories will appear. Don't commit ~90MB of model weights.
+.cache/
+**/transformers-cache/
+*.onnx
+*.bin
+*.safetensors
+
+# ─── IDE / editor ───────────────────────────────────────────
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── OS junk ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+ehthumbs.db
+ehthumbs_vista.db
+
+# ─── Hackathon / scratch ────────────────────────────────────
+# Personal notes, scratch files, demo recordings — keep these local.
+TODO.local.md
+NOTES.local.md
+scratch/
+tmp/
+*.demo.mp4
+*.demo.mov
+demo-recordings/
