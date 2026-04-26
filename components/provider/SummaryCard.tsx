@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle } from "lucide-react";
 import type { IntakeCheatSheet, SentimentTrend } from "@/types/Intake";
 
 interface SummaryCardProps {
@@ -66,6 +66,57 @@ export function SummaryCard({ sheet }: SummaryCardProps) {
         blobColor="bg-cyan-100"
         className="col-span-4 sm:col-span-2"
       />
+
+      {(sheet.soapNarrative || sheet.dominantTheme || sheet.priorityFocus || (sheet.riskFlags && sheet.riskFlags.length > 0)) && (
+        <div className="col-span-4 sm:col-span-12 space-y-4">
+          {sheet.soapNarrative && (
+            <div className="rounded-xl border border-border bg-bg-elevated px-5 py-4">
+              <div className="text-xs uppercase tracking-wider text-text-tertiary mb-2">
+                Clinical Summary
+              </div>
+              <p className="text-sm text-text-primary leading-relaxed">
+                {sheet.soapNarrative}
+              </p>
+            </div>
+          )}
+
+          {sheet.dominantTheme && (
+            <div className="flex items-baseline gap-3 rounded-xl border border-border bg-bg-elevated px-5 py-4">
+              <div className="text-xs uppercase tracking-wider text-text-tertiary whitespace-nowrap">
+                Dominant Theme
+              </div>
+              <div className="text-sm font-medium text-accent">
+                {sheet.dominantTheme}
+              </div>
+            </div>
+          )}
+
+          {sheet.priorityFocus && (
+            <div className="rounded-xl border border-border bg-bg-elevated px-5 py-4">
+              <div className="text-xs uppercase tracking-wider text-text-tertiary mb-2">
+                Priority for Next Session
+              </div>
+              <p className="text-sm text-text-primary">{sheet.priorityFocus}</p>
+            </div>
+          )}
+
+          {sheet.riskFlags && sheet.riskFlags.length > 0 && (
+            <div className="rounded-xl border border-sentiment-negative/30 bg-sentiment-negative/10 px-5 py-4">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-sentiment-negative mb-2">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Risk Flags
+              </div>
+              <ul className="space-y-1">
+                {sheet.riskFlags.map((flag, i) => (
+                  <li key={i} className="text-sm text-sentiment-negative">
+                    {flag}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

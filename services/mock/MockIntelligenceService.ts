@@ -130,35 +130,11 @@ export class MockIntelligenceService implements IntelligenceService {
       .slice(0, 8)
       .map(([k]) => k);
 
-    // Embedding: deterministic pseudo-random vector seeded from transcript hash
-    const seed = simpleHash(transcript);
-    const vector = generateVector(seed, 128);
-
     return {
       score: Math.max(-1, Math.min(1, score)),
       keywords,
-      vector,
+      vector: [],
     };
   }
 }
 
-function simpleHash(s: string): number {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) {
-    h = ((h << 5) + h + s.charCodeAt(i)) | 0;
-  }
-  return h;
-}
-
-function generateVector(seed: number, dim: number): number[] {
-  let s = seed;
-  const out: number[] = [];
-  for (let i = 0; i < dim; i++) {
-    // xorshift32
-    s ^= s << 13;
-    s ^= s >>> 17;
-    s ^= s << 5;
-    out.push(((s & 0x7fffffff) / 0x7fffffff) * 2 - 1);
-  }
-  return out;
-}

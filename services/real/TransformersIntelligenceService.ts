@@ -34,11 +34,10 @@ const STOPWORDS = new Set([
 
 export class TransformersIntelligenceService implements IntelligenceService {
   private sentimentPipeline: Pipeline | null = null;
-  private embeddingPipeline: Pipeline | null = null;
   private warmupPromise: Promise<void> | null = null;
 
   isReady(): boolean {
-    return this.sentimentPipeline !== null && this.embeddingPipeline !== null;
+    return this.sentimentPipeline !== null;
   }
 
   async warmup(): Promise<void> {
@@ -62,17 +61,17 @@ export class TransformersIntelligenceService implements IntelligenceService {
       // Try WebGPU first; fall back to WASM if unavailable.
       const device = await detectBestDevice();
 
-      const [sentiment, embedding] = await Promise.all([
-        pipeline(
-          "sentiment-analysis",
-          "Xenova/distilbert-base-uncased-finetuned-sst-2-english",
-          { device }
-        ),
-        pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", { device }),
-      ]);
+      // @xenova/transformers PretrainedOptions types don't include `device`,
+      // but the runtime supports it. Cast the function via unknown to allow it.
+      type FlexPipeline = (task: string, model: string, opts: { device?: string }) => Promise<unknown>;
+      const flexPipeline = pipeline as unknown as FlexPipeline;
+      const sentiment = await flexPipeline(
+        "sentiment-analysis",
+        "Xenova/distilbert-base-uncased-finetuned-sst-2-english",
+        { device }
+      );
 
       this.sentimentPipeline = sentiment as Pipeline;
-      this.embeddingPipeline = embedding as Pipeline;
     })();
 
     return this.warmupPromise;
@@ -83,8 +82,8 @@ export class TransformersIntelligenceService implements IntelligenceService {
       throw new Error("Cannot analyze an empty transcript");
     }
     await this.warmup();
-    if (!this.sentimentPipeline || !this.embeddingPipeline) {
-      throw new Error("Intelligence pipelines not initialized");
+    if (!this.sentimentPipeline) {
+      throw new Error("Sentiment pipeline not initialized");
     }
 
     // Sentiment: DistilBERT outputs {label: "POSITIVE"|"NEGATIVE", score: 0..1}
@@ -95,17 +94,11 @@ export class TransformersIntelligenceService implements IntelligenceService {
     const confidence: number = first.score;
     const score = label.toUpperCase() === "POSITIVE" ? confidence : -confidence;
 
-    // Embedding: mean-pooled, normalized 384-dim vector
-    const embeddingOutput = await this.embeddingPipeline(transcript, {
-      pooling: "mean",
-      normalize: true,
-    });
-    const vector: number[] = Array.from(embeddingOutput.data as Float32Array);
-
     // Keywords: heuristic extraction
     const keywords = extractKeywords(transcript);
 
-    return { score, keywords, vector };
+    // MiniLM embeddings removed — vector reserved for future semantic search
+    return { score, keywords, vector: [] };
   }
 }
 
