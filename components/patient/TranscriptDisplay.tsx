@@ -3,12 +3,14 @@
 interface TranscriptDisplayProps {
   transcript: string;
   isLive?: boolean;
+  isPaused?: boolean;
   placeholder?: string;
 }
 
 export function TranscriptDisplay({
   transcript,
   isLive,
+  isPaused,
   placeholder = "Your words will appear here as you speak…",
 }: TranscriptDisplayProps) {
   return (
@@ -21,7 +23,7 @@ export function TranscriptDisplay({
           <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
             Transcript
           </div>
-          {isLive && (
+          {isLive && !isPaused && (
             <div className="flex items-center gap-2.5 text-xs font-bold text-rose-500 bg-rose-50/80 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-rose-100">
               <span className="relative flex w-2.5 h-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
@@ -30,13 +32,19 @@ export function TranscriptDisplay({
               Recording
             </div>
           )}
+          {isPaused && (
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-50/80 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-slate-200">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+              Paused
+            </div>
+          )}
         </div>
 
         <div className="text-slate-700 text-lg sm:text-xl font-medium leading-relaxed whitespace-pre-wrap min-h-[100px]">
           {transcript || (
             <span className="text-slate-300 font-normal italic">{placeholder}</span>
           )}
-          {isLive && transcript && (
+          {isLive && !isPaused && transcript && (
             <span className="inline-block w-0.5 h-6 ml-1 bg-violet-500 rounded-full animate-pulse-soft align-middle" />
           )}
         </div>
