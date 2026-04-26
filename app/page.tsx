@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useAuth0 } from "@auth0/auth0-react";
+
 import { LogIn } from "lucide-react";
 import Hero from "@/components/landing/Hero";
 import StickyTitle from "@/components/landing/StickyTitle";
@@ -41,30 +41,22 @@ const SECTIONS = [
   },
 ];
 
-export default function LandingPage() {
-  const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
+import Link from "next/link";
 
+export default function LandingPage() {
   return (
     <main className="relative w-full overflow-x-hidden bg-gradient-to-b from-[#dbeafe] via-[#e0e7ff] to-[#ede9fe]">
       {/* ─── Login button fixed top-right ─── */}
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110]">
-        {!isLoading && !isAuthenticated && (
-          <button
-            onClick={() => loginWithRedirect()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
-              bg-white/30 backdrop-blur-xl border border-white/40
-              text-white text-sm font-bold shadow-lg
-              hover:bg-white/50 hover:scale-105 active:scale-95
-              transition-all duration-300"
-            style={{
-              textShadow: "0 1px 3px rgba(0,0,0,0.2)",
-            }}
-          >
-            <LogIn className="w-4 h-4" />
-            Log In
-          </button>
-        )}
-      </div>
+      <Link
+        href="/login"
+        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/30 backdrop-blur-xl border border-white/40 text-white text-sm font-bold shadow-lg hover:bg-white/50 hover:scale-105 active:scale-95 transition-all duration-300"
+        style={{
+          textShadow: "0 1px 3px rgba(0,0,0,0.2)",
+        }}
+      >
+        <LogIn className="w-4 h-4" />
+        Log In
+      </Link>
 
       {/* ─── Sticky title (appears after scrolling past hero) ─── */}
       <StickyTitle />
