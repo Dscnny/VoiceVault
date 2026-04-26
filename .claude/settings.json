@@ -2,6 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npm run *)"
+    ],
+    "additionalDirectories": [
+      "/mnt/c/Users/payto/OneDrive - Riverside Community College District/VoiceVault/app"
     ]
   }
 }

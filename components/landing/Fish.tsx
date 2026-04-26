@@ -12,6 +12,11 @@ interface FishProps {
 /**
  * A custom SVG fish with animated tail, fins, and gentle body bobbing.
  * Rotation is handled by the parent (ScrollFishPath) via CSS transform.
+ *
+ * Tail wag is achieved via skewX on a <motion.g> wrapper — framer-motion 12.x
+ * does not reliably interpolate SVG path `d` attribute strings (produces
+ * `d="undefined"` during the first render frame), so all motion.path d-animations
+ * have been replaced with transform-based animations on group elements.
  */
 export default function Fish({ size = 1, className = "" }: FishProps) {
   const w = 80 * size;
@@ -25,65 +30,48 @@ export default function Fish({ size = 1, className = "" }: FishProps) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      /* gentle vertical bob while swimming */
       animate={{ y: [0, -3, 0, 3, 0] }}
       transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
     >
-      {/* ─── Tail ─── */}
-      <motion.path
-        d="M6 25 C-2 15, -2 10, 4 5 C8 12, 8 18, 6 25 Z"
-        fill="url(#tailGrad)"
-        opacity={0.85}
-        animate={{ d: [
-          "M6 25 C-2 15, -2 10, 4 5 C8 12, 8 18, 6 25 Z",
-          "M6 25 C0 17, 1 12, 6 8 C9 14, 8 19, 6 25 Z",
-          "M6 25 C-2 15, -2 10, 4 5 C8 12, 8 18, 6 25 Z",
-        ] }}
-        transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.path
-        d="M6 25 C-2 35, -2 40, 4 45 C8 38, 8 32, 6 25 Z"
-        fill="url(#tailGrad)"
-        opacity={0.85}
-        animate={{ d: [
-          "M6 25 C-2 35, -2 40, 4 45 C8 38, 8 32, 6 25 Z",
-          "M6 25 C0 33, 1 38, 6 42 C9 36, 8 31, 6 25 Z",
-          "M6 25 C-2 35, -2 40, 4 45 C8 38, 8 32, 6 25 Z",
-        ] }}
-        transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {/* ─── Tail (skewX wag instead of d-morphing) ─── */}
+      <motion.g
+        animate={{ skewY: [-6, 6, -6] }}
+        transition={{ duration: 0.7, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformOrigin: "14px 25px" }}
+      >
+        <path
+          d="M6 25 C-2 15, -2 10, 4 5 C8 12, 8 18, 6 25 Z"
+          fill="url(#tailGrad)"
+          opacity={0.85}
+        />
+        <path
+          d="M6 25 C-2 35, -2 40, 4 45 C8 38, 8 32, 6 25 Z"
+          fill="url(#tailGrad)"
+          opacity={0.85}
+        />
+      </motion.g>
 
       {/* ─── Body (rounder for cute look) ─── */}
       <ellipse cx="38" cy="25" rx="26" ry="18" fill="url(#bodyGrad)" />
       {/* body sheen */}
       <ellipse cx="40" cy="19" rx="16" ry="9" fill="rgba(255,255,255,0.22)" />
 
-      {/* ─── Dorsal fin ─── */}
+      {/* ─── Dorsal fin (gentle opacity pulse instead of d-morphing) ─── */}
       <motion.path
         d="M30 9 Q38 -2, 48 9"
         stroke="url(#finGrad)"
         strokeWidth="2.5"
         fill="url(#finGrad)"
-        opacity={0.7}
-        animate={{ d: [
-          "M30 9 Q38 -2, 48 9",
-          "M30 9 Q38 1, 48 9",
-          "M30 9 Q38 -2, 48 9",
-        ] }}
+        animate={{ opacity: [0.7, 0.5, 0.7] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* ─── Pectoral fin (bottom) ─── */}
+      {/* ─── Pectoral fin (static — subtle scaleY wobble on group) ─── */}
       <motion.path
         d="M32 36 Q38 46, 46 38"
         stroke="none"
         fill="url(#finGrad)"
-        opacity={0.55}
-        animate={{ d: [
-          "M32 36 Q38 46, 46 38",
-          "M32 36 Q38 43, 46 38",
-          "M32 36 Q38 46, 46 38",
-        ] }}
+        animate={{ opacity: [0.55, 0.35, 0.55] }}
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
       />
 
