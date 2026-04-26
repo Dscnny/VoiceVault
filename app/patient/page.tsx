@@ -11,6 +11,8 @@ import { TranscriptDisplay } from "@/components/patient/TranscriptDisplay";
 import { NudgeCard } from "@/components/patient/NudgeCard";
 import { KeywordPills } from "@/components/patient/KeywordPills";
 import { SentimentBadge } from "@/components/patient/SentimentBadge";
+import { CrabIndicator } from "@/components/patient/CrabIndicator";
+import { StarfishIndicator } from "@/components/patient/StarfishIndicator";
 import type { RecordingController } from "@/services/interfaces/AudioTranscriptionService";
 import type { JournalEntry } from "@/types/JournalEntry";
 import type { SentimentResult } from "@/types/SentimentResult";
@@ -174,16 +176,9 @@ export default function PatientPage() {
           animate="show"
           className="text-center mb-16"
         >
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter text-slate-800 leading-[0.9] mb-4">
-            How are you
-            <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400">
-              doing tonight?
-            </span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-slate-800 mb-4">
+            click the bubble to talk!
           </h1>
-          <p className="text-slate-400 text-lg sm:text-xl font-medium">
-            Speak for as long as you'd like. Nothing leaves this device.
-          </p>
         </motion.div>
 
         {/* ─── The Orb ─── */}
@@ -218,65 +213,65 @@ export default function PatientPage() {
           )}
         </AnimatePresence>
 
-        {/* ─── Transcript + Results Bento ─── */}
-        <AnimatePresence>
-          {(displayTranscript || state === "recording" || state === "paused") && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="mb-8"
-            >
-              <TranscriptDisplay
-                transcript={displayTranscript}
-                isLive={state === "recording"}
-                isPaused={state === "paused"}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* ─── Conversation Box ─── */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          transition={{ delay: 0.2 }}
+          className="relative mt-12 mb-8 bg-white/40 backdrop-blur-md rounded-3xl border-4 border-indigo-400 shadow-[0_0_40px_rgba(129,140,248,0.3)] p-6 sm:p-10 min-h-[400px] flex flex-col justify-between"
+        >
+          {/* User Transcript Area (Upper Right) */}
+          <div className="flex flex-col items-end w-full mb-8 relative z-30">
+            <div className="max-w-[85%] sm:max-w-[70%] bg-blue-100/90 backdrop-blur-sm p-5 rounded-3xl rounded-tr-sm shadow-sm border border-blue-200 text-slate-700 text-lg leading-relaxed whitespace-pre-wrap">
+              {displayTranscript || state === "recording" || state === "paused" ? (
+                <>
+                  {displayTranscript}
+                  {state === "recording" && (
+                    <span className="inline-block w-1.5 h-5 ml-1 bg-blue-500 rounded-full animate-pulse align-middle" />
+                  )}
+                </>
+              ) : (
+                <span className="text-slate-400 italic">your words will appear here.</span>
+              )}
+            </div>
+          </div>
 
-        <AnimatePresence>
-          {sentiment && (
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 80, damping: 20, delay: 0.1 }}
-            >
-              {/* Bento grid for results */}
-              <div className="grid grid-cols-4 gap-4">
-                {/* Sentiment score — big tile */}
-                <div className="col-span-4 sm:col-span-2 rounded-4xl glass shadow-bento p-10 relative overflow-hidden group hover:shadow-bento-hover transition-all duration-500">
-                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-100 rounded-full blur-3xl opacity-40" />
-                  <div className="relative z-10">
-                    <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Sentiment</div>
-                    <div className={`text-6xl sm:text-7xl font-black tabular-nums tracking-tighter mb-3 ${
-                      sentiment.score > 0.25 ? "text-emerald-600" :
-                      sentiment.score < -0.25 ? "text-rose-600" : "text-slate-800"
-                    }`}>
-                      {sentiment.score >= 0 ? "+" : ""}{sentiment.score.toFixed(2)}
+          {/* AI Response Area (Lower Left) */}
+          <div className="flex flex-col items-start w-full relative z-30">
+            <div className="max-w-[85%] sm:max-w-[70%] bg-white/90 backdrop-blur-sm p-5 rounded-3xl rounded-tl-sm shadow-sm border border-white/50 text-slate-700 text-lg leading-relaxed">
+              {state === "processing" ? (
+                <span className="text-slate-400 italic flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-slate-300 animate-bounce" />
+                  <span className="w-2 h-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </span>
+              ) : empathy ? (
+                <div className="flex flex-col gap-3">
+                  <p className="font-medium text-slate-700">{empathy.message}</p>
+                  {sentiment && (
+                    <div className="flex flex-wrap gap-2 items-center mt-2">
+                      <SentimentBadge score={sentiment.score} mode={empathy.mode} />
+                      <KeywordPills keywords={sentiment.keywords} label="" />
                     </div>
-                    <SentimentBadge score={sentiment.score} />
-                  </div>
+                  )}
                 </div>
+              ) : (
+                <span className="text-slate-400 italic">VoiceVault will respond here.</span>
+              )}
+            </div>
+          </div>
 
-                {/* Keywords — smaller tiles */}
-                <div className="col-span-4 sm:col-span-2 rounded-4xl glass shadow-bento p-10 relative overflow-hidden">
-                  <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-cyan-100 rounded-full blur-3xl opacity-40" />
-                  <KeywordPills keywords={sentiment.keywords} />
-                </div>
+          {/* Crab (Bottom Left) */}
+          <div className="absolute -bottom-10 -left-6 z-40 pointer-events-none">
+            <CrabIndicator isActive={state === "processing" || empathy !== null} />
+          </div>
 
-                {/* Nudge — full width */}
-                {empathy && (
-                  <div className="col-span-4">
-                    <NudgeCard response={empathy} />
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* Starfish (Bottom Right) */}
+          <div className="absolute -bottom-8 -right-6 z-40 pointer-events-none">
+            <StarfishIndicator isActive={state === "recording"} />
+          </div>
+        </motion.div>
 
       </div>
     </main>

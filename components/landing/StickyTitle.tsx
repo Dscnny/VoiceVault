@@ -25,7 +25,7 @@ export default function StickyTitle() {
             "0 0 30px rgba(147,197,253,0.4), 0 2px 10px rgba(0,0,0,0.2)",
         }}
       >
-        voicevault
+        VoiceVault
       </button>
     </motion.div>
   );

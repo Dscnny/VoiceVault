@@ -59,14 +59,14 @@ export default function LandingPage() {
       }}
     >
       {/* ─── Header ─── */}
-      <header className="fixed top-0 left-0 right-0 z-[110] flex items-center justify-between px-4 sm:px-6 py-4 sm:py-6 pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 z-[110] flex items-center justify-between px-4 sm:px-6 py-4 sm:py-6">
         <Link
           href="/"
-          className="text-lg sm:text-xl font-black tracking-tight text-slate-800 hover:text-slate-600 transition-colors pointer-events-auto"
+          className="text-lg sm:text-xl font-black tracking-tight text-slate-800 hover:text-slate-600 transition-colors"
         >
           VoiceVault
         </Link>
-        <div className="pointer-events-auto">
+        <div>
           <AuthButtons />
         </div>
       </header>
