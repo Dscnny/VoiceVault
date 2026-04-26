@@ -14,23 +14,28 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 import type { JournalEntry } from "@/types/JournalEntry";
+import type { PatientDossier } from "@/types/Intake";
 
 const SYSTEM_PROMPT = `You are a clinical documentation assistant helping therapists prepare for patient sessions.
 Your output is read by busy clinicians — be concise, factual, and precise.
+You will be provided with an EXISTING PATIENT DOSSIER (if one exists) and a list of RECENT JOURNAL ENTRIES.
+Your task is to iteratively UPDATE the dossier using the new entries, preserving important historical context while surfacing new insights or shifting trends.
+
 Write as if summarizing patient notes for a provider who has 90 seconds to read before a session.
 Do not add fluff, hedging, or pleasantries.
 
 You MUST respond ONLY with valid JSON. No markdown, no preamble, no trailing explanation.
 The JSON must match this exact shape:
 {
-  "summary": "<3-5 sentence SOAP-lite narrative for the provider>",
-  "dominantTheme": "<the single dominant emotional theme across the period>",
-  "priorityFocus": "<the single most important thing the provider should address>",
+  "summary": "<3-5 sentence SOAP-lite narrative for the provider, combining history and new updates>",
+  "dominantTheme": "<the single dominant emotional theme across the patient's entire profile>",
+  "priorityFocus": "<the single most important thing the provider should address right now>",
   "riskFlags": ["<flag 1>", "<flag 2>"]
 }
 
 riskFlags should be an empty array [] if no risk factors are present.
-Include a risk flag if you detect: crisis-level sentiment, self-harm language, medication concerns, or mentions of suicidality.`;
+Include a risk flag if you detect: crisis-level sentiment, self-harm language, medication concerns, or mentions of suicidality.
+Preserve old risk flags if they still seem clinically relevant, but remove them if the patient explicitly indicates the risk has passed.`;
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -41,7 +46,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { entries: JournalEntry[]; days: number };
+  let body: { existingDossier?: PatientDossier; newEntries: JournalEntry[]; days: number };
 
   try {
     body = await request.json();
@@ -49,17 +54,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { entries, days } = body;
+  // Handle fallback if legacy callers still send { entries: ... }
+  const legacyEntries = (body as any).entries;
+  const newEntries = body.newEntries || legacyEntries;
+  const { existingDossier, days } = body;
 
-  if (!Array.isArray(entries) || entries.length === 0) {
-    return NextResponse.json(
-      { error: "entries must be a non-empty array" },
-      { status: 400 }
-    );
+  if (!Array.isArray(newEntries) || newEntries.length === 0) {
+    if (!existingDossier) {
+      return NextResponse.json(
+        { error: "newEntries must be a non-empty array if no dossier exists" },
+        { status: 400 }
+      );
+    }
   }
 
   // Build a compact representation of entries for the prompt
-  const entryLines = entries
+  const entryLines = (newEntries || [])
     .slice()
     .sort(
       (a, b) =>
@@ -76,11 +86,24 @@ export async function POST(request: NextRequest) {
         e.rawTranscript.length > 300
           ? e.rawTranscript.slice(0, 300) + "…"
           : e.rawTranscript;
-      return `Entry ${i + 1} [${date}, score: ${score}]${keywords ? `, keywords: ${keywords}` : ""}:\n"${preview}"`;
+      return `Entry [${date}, score: ${score}]${keywords ? `, keywords: ${keywords}` : ""}:\n"${preview}"`;
     })
     .join("\n\n");
 
-  const userMessage = `Here are ${entries.length} journal entries from the past ${days} days. Generate a clinical pre-session summary.\n\n${entryLines}`;
+  let userMessage = "";
+  if (existingDossier) {
+    userMessage += `=== EXISTING DOSSIER ===\n`;
+    userMessage += `Narrative: ${existingDossier.soapNarrative}\n`;
+    userMessage += `Theme: ${existingDossier.dominantTheme}\n`;
+    userMessage += `Focus: ${existingDossier.priorityFocus}\n`;
+    userMessage += `Risks: ${(existingDossier.riskFlags || []).join(", ")}\n\n`;
+  }
+  
+  if (newEntries && newEntries.length > 0) {
+    userMessage += `=== NEW JOURNAL ENTRIES ===\n${entryLines}`;
+  } else {
+    userMessage += `No new entries. Please just return the existing dossier in the correct JSON format.`;
+  }
 
   const client = new Anthropic({ apiKey });
 

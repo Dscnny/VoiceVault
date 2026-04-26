@@ -56,3 +56,15 @@ export interface IntakeCheatSheet {
   /** Risk flags: crisis-level sentiment, self-harm language, medication concerns. Optional. */
   riskFlags?: string[];
 }
+
+/**
+ * Persisted clinical profile for a specific user, continuously updated.
+ */
+export interface PatientDossier {
+  userId: string;
+  soapNarrative: string;
+  dominantTheme: string;
+  priorityFocus: string;
+  riskFlags: string[];
+  lastUpdated: Date;
+}

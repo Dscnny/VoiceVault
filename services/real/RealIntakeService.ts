@@ -17,10 +17,10 @@ import type { StorageService } from "@/services/interfaces/StorageService";
 export class RealIntakeService implements IntakeService {
   constructor(private storage: StorageService) {}
 
-  async generateCheatSheet(days = 7): Promise<IntakeCheatSheet> {
+  async generateCheatSheet(userId: string, days = 7): Promise<IntakeCheatSheet> {
     const endDate = new Date();
     const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
-    const entries = await this.storage.fetchEntries(startDate, endDate);
+    const entries = await this.storage.fetchEntries(startDate, endDate, userId);
 
     if (entries.length === 0) {
       return {
@@ -76,16 +76,17 @@ export class RealIntakeService implements IntakeService {
   }
 
   async topKeywords(
+    userId: string,
     startDate: Date,
     endDate: Date,
     limit = 5
   ): Promise<KeywordCount[]> {
-    const entries = await this.storage.fetchEntries(startDate, endDate);
+    const entries = await this.storage.fetchEntries(startDate, endDate, userId);
     return aggregateKeywords(entries.flatMap((e) => e.extractedKeywords)).slice(0, limit);
   }
 
-  async sentimentTrend(startDate: Date, endDate: Date): Promise<SentimentTrend> {
-    const entries = await this.storage.fetchEntries(startDate, endDate);
+  async sentimentTrend(userId: string, startDate: Date, endDate: Date): Promise<SentimentTrend> {
+    const entries = await this.storage.fetchEntries(startDate, endDate, userId);
     const ordered = [...entries].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
     return computeTrend(ordered.map((e) => e.sentimentScore));
   }

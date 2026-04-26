@@ -57,6 +57,13 @@ export class TransformersIntelligenceService implements IntelligenceService {
       // Use the CDN for model files; tell the runtime to cache them.
       env.allowRemoteModels = true;
       env.allowLocalModels = false;
+      
+      // Fix Next.js App Router Webpack issue with loading WASM dynamically
+      // by explicitly pointing to the unpkg/jsdelivr CDN for the runtime files.
+      env.backends.onnx.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/";
+      
+      // Disable multi-threading/Web Workers to prevent Next.js from throwing the blob dynamic import error
+      env.backends.onnx.wasm.numThreads = 1;
 
       // Try WebGPU first; fall back to WASM if unavailable.
       const device = await detectBestDevice();

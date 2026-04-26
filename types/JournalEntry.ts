@@ -16,6 +16,9 @@ export interface JournalEntry {
   /** Stable, globally unique identifier for this entry. */
   id: string;
 
+  /** The Auth0 user ID that owns this entry. Optional for backward compatibility with old local records. */
+  userId?: string;
+
   /** The exact date and time the recording was initiated by the user. */
   timestamp: Date;
 

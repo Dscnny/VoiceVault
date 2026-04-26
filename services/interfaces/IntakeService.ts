@@ -15,17 +15,19 @@ export interface IntakeService {
   /**
    * Generate a clinical intake cheat sheet from the last N days of entries.
    *
+   * @param userId - Auth0 user ID
    * @param days — how many days back to analyze (default: 7)
    */
-  generateCheatSheet(days?: number): Promise<IntakeCheatSheet>;
+  generateCheatSheet(userId: string, days?: number): Promise<IntakeCheatSheet>;
 
   /** Top-N keywords across the analysis window, ordered by frequency. */
   topKeywords(
+    userId: string,
     startDate: Date,
     endDate: Date,
     limit?: number
   ): Promise<KeywordCount[]>;
 
   /** Linear-regression trend on chronologically ordered sentiment scores. */
-  sentimentTrend(startDate: Date, endDate: Date): Promise<SentimentTrend>;
+  sentimentTrend(userId: string, startDate: Date, endDate: Date): Promise<SentimentTrend>;
 }

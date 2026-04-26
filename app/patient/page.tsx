@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useServices } from "@/lib/serviceContainer";
 import { RecordButton, type RecordState } from "@/components/patient/RecordButton";
@@ -21,6 +22,7 @@ const fadeUp = {
 };
 
 export default function PatientPage() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth0();
   const services = useServices();
   const [state, setState] = useState<RecordState>("idle");
   const [transcript, setTranscript] = useState("");
@@ -108,6 +110,7 @@ export default function PatientPage() {
 
       const entry: JournalEntry = {
         id: crypto.randomUUID(),
+        userId: user?.sub, // Tie to auth account
         timestamp: new Date(),
         rawTranscript: finalText,
         sentimentScore: sentimentResult.score,

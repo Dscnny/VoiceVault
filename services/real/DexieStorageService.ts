@@ -10,6 +10,7 @@ import type {
   JournalSortOrder,
   StorageService,
 } from "@/services/interfaces/StorageService";
+import type { PatientDossier } from "@/types/Intake";
 
 /**
  * Dexie row shape — Dexie can store native Date objects, but we keep the
@@ -19,13 +20,18 @@ type JournalRow = JournalEntry;
 
 class VoiceVaultDB extends Dexie {
   entries!: Table<JournalRow, string>;
+  dossiers!: Table<PatientDossier, string>;
 
   constructor() {
     super("VoiceVaultDB");
+    // Version 1: Initial schema
     this.version(1).stores({
-      // Primary key: id. Indexes: timestamp (for date-range queries),
-      // sentimentScore (for finding outliers in provider dashboard).
       entries: "id, timestamp, sentimentScore, isFullyProcessed",
+    });
+    // Version 2: Added userId indexing and dossiers table
+    this.version(2).stores({
+      entries: "id, timestamp, sentimentScore, isFullyProcessed, userId",
+      dossiers: "userId",
     });
   }
 }
@@ -47,23 +53,36 @@ export class DexieStorageService implements StorageService {
     return entry;
   }
 
-  async fetchAll(sortedBy: JournalSortOrder = "newestFirst"): Promise<JournalEntry[]> {
-    const all = await this.db.entries.orderBy("timestamp").toArray();
+  async fetchAll(userId?: string, sortedBy: JournalSortOrder = "newestFirst"): Promise<JournalEntry[]> {
+    let all: JournalEntry[];
+    if (userId) {
+      all = await this.db.entries.where("userId").equals(userId).toArray();
+      all.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    } else {
+      all = await this.db.entries.orderBy("timestamp").toArray();
+    }
     return sortedBy === "newestFirst" ? all.reverse() : all;
   }
 
-  async fetchEntries(startDate: Date, endDate: Date): Promise<JournalEntry[]> {
-    const rows = await this.db.entries
+  async fetchEntries(startDate: Date, endDate: Date, userId?: string): Promise<JournalEntry[]> {
+    let rows = await this.db.entries
       .where("timestamp")
       .between(startDate, endDate, true, true)
       .toArray();
+      
+    if (userId) {
+      rows = rows.filter(r => r.userId === userId);
+    }
     return rows.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
-  async searchEntries(query: string): Promise<JournalEntry[]> {
+  async searchEntries(query: string, userId?: string): Promise<JournalEntry[]> {
     const lowered = query.toLowerCase();
     return this.db.entries
-      .filter((e) => e.rawTranscript.toLowerCase().includes(lowered))
+      .filter((e) => {
+        if (userId && e.userId !== userId) return false;
+        return e.rawTranscript.toLowerCase().includes(lowered);
+      })
       .toArray();
   }
 
@@ -73,8 +92,30 @@ export class DexieStorageService implements StorageService {
     await this.db.entries.delete(id);
   }
 
-  async entryCount(): Promise<number> {
+  async entryCount(userId?: string): Promise<number> {
+    if (userId) {
+      return this.db.entries.where("userId").equals(userId).count();
+    }
     return this.db.entries.count();
+  }
+
+  async fetchDossier(userId: string): Promise<PatientDossier | null> {
+    const dossier = await this.db.dossiers.get(userId);
+    return dossier ?? null;
+  }
+
+  async saveDossier(dossier: PatientDossier): Promise<void> {
+    await this.db.dossiers.put(dossier);
+  }
+
+  async assignAnonymousEntries(userId: string): Promise<void> {
+    const all = await this.db.entries.toArray();
+    const anonymous = all.filter(e => !e.userId);
+    
+    if (anonymous.length > 0) {
+      const updated = anonymous.map(e => ({ ...e, userId }));
+      await this.db.entries.bulkPut(updated);
+    }
   }
 
   /** Wipe all data — useful for demo reset. */

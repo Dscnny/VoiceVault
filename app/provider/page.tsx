@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAuth0 } from "@auth0/auth0-react";
 import { ArrowLeft, Database, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useServices } from "@/lib/serviceContainer";
@@ -20,22 +21,27 @@ const fadeUp = {
 };
 
 export default function ProviderPage() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth0();
   const services = useServices();
   const [sheet, setSheet] = useState<IntakeCheatSheet | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [windowDays, setWindowDays] = useState(30);
 
-  const load = async (days: number) => {
+  const load = async (days: number, userId: string) => {
     setLoading(true);
     try {
+      // First, retroactively assign any old anonymous local entries to this user
+      await services.storage.assignAnonymousEntries(userId);
+
       // For the provider dashboard we want a full picture, so analyze the
-      // last `days` days of entries.
+      // last `days` days of entries for this specific user.
       const end = new Date();
       const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
-      const all = await services.storage.fetchEntries(start, end);
+      const all = await services.storage.fetchEntries(start, end, userId);
       setEntries(all);
-      const cheatSheet = await services.intake.generateCheatSheet(days);
+      
+      const cheatSheet = await services.intake.generateCheatSheet(userId, days);
       setSheet(cheatSheet);
     } finally {
       setLoading(false);
@@ -43,19 +49,31 @@ export default function ProviderPage() {
   };
 
   useEffect(() => {
-    load(windowDays);
+    if (!authLoading && isAuthenticated && user?.sub) {
+      load(windowDays, user.sub);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [windowDays]);
+  }, [windowDays, authLoading, isAuthenticated, user?.sub]);
 
   const seedSampleData = async () => {
     // If running on the real Dexie service, seed it from the mock samples.
-    if (services.storage instanceof DexieStorageService) {
+    if (services.storage instanceof DexieStorageService && user?.sub) {
       const mockSamples = MockStorageService.withSampleData();
-      const samples = await mockSamples.fetchAll("newestFirst");
-      await (services.storage as DexieStorageService).seedSampleDataIfEmpty(samples);
-      await load(windowDays);
+      const samples = await mockSamples.fetchAll();
+      // Tie mock samples to the current user
+      const userSamples = samples.map(s => ({ ...s, userId: user.sub }));
+      await (services.storage as DexieStorageService).seedSampleDataIfEmpty(userSamples);
+      await load(windowDays, user.sub);
     }
   };
+
+  if (authLoading || (!isAuthenticated && loading)) {
+    return (
+      <main className="min-h-screen relative flex items-center justify-center">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-400 animate-pulse-recording shadow-lg shadow-cyan-200" />
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen relative overflow-hidden">
@@ -90,7 +108,7 @@ export default function ProviderPage() {
               <option value={30}>Last 30 days</option>
             </select>
             <button
-              onClick={() => load(windowDays)}
+              onClick={() => user?.sub && load(windowDays, user.sub)}
               className="p-2.5 rounded-xl glass shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300"
               aria-label="Refresh"
             >
@@ -129,7 +147,7 @@ export default function ProviderPage() {
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-400 animate-pulse-recording shadow-lg shadow-cyan-200" />
-                <span className="text-slate-500 font-bold text-lg">Computing dossier…</span>
+                <span className="text-slate-500 font-bold text-lg">Securely loading clinical profile…</span>
               </div>
             </motion.div>
           )}
