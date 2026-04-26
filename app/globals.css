@@ -102,3 +102,16 @@ html, body {
   pointer-events: none;
   z-index: 0;
 }
+
+/* ─── Wave bar animation for visual cards ─── */
+@keyframes waveBar {
+  0% { transform: scaleY(1); }
+  100% { transform: scaleY(0.5); }
+}
+
+/* ─── Float animation for decorative elements ─── */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-12px) rotate(1deg); }
+  66% { transform: translateY(-6px) rotate(-1deg); }
+}

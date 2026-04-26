@@ -1,143 +1,144 @@
 "use client";
 
-import Link from "next/link";
-import { Mic, Activity, Lock, Shield, Cpu, Database } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useAuth0 } from "@auth0/auth0-react";
-import { AuthButtons } from "@/components/auth/AuthButtons";
-import { UserProfile } from "@/components/auth/UserProfile";
+import { LogIn } from "lucide-react";
+import Hero from "@/components/landing/Hero";
+import StickyTitle from "@/components/landing/StickyTitle";
+import FeatureSection from "@/components/landing/FeatureSection";
 
-export default function HomePage() {
-  const { isAuthenticated, isLoading } = useAuth0();
+// Dynamic import to avoid SSR issues with getPointAtLength
+const ScrollFishPath = dynamic(
+  () => import("@/components/landing/ScrollFishPath"),
+  { ssr: false }
+);
+
+/* ─── Section data ─── */
+const SECTIONS = [
+  {
+    title: "A space between sessions",
+    body: "Therapy does not end after one hour. VoiceVault helps you reflect, process, and capture what happens between appointments.",
+    buttons: [{ label: "Start talking" }, { label: "See how it works" }],
+    cardVariant: "microphone" as const,
+  },
+  {
+    title: "When thoughts don\u2019t wait",
+    body: "Late nights, stressful moments, and emotional check-ins can be saved before they disappear.",
+    buttons: [{ label: "Open vault" }, { label: "Learn more" }],
+    cardVariant: "mood" as const,
+  },
+  {
+    title: "Patterns, not just moments",
+    body: "VoiceVault turns conversations into gentle summaries, mood trends, and therapist-ready insights.",
+    buttons: [{ label: "View insights" }, { label: "See demo" }],
+    cardVariant: "therapist" as const,
+  },
+  {
+    title: "Guided, not alone",
+    body: "A calm fish companion guides users through reflection and makes progress feel visual, gentle, and alive.",
+    buttons: [{ label: "Meet your guide" }, { label: "Start reflection" }],
+    cardVariant: "reflection" as const,
+  },
+];
+
+export default function LandingPage() {
+  const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
 
   return (
-    <main className="min-h-screen relative overflow-hidden">
-      {/* ─── Decorative blobs BEHIND the glass ─── */}
-      <div className="blob w-[500px] h-[500px] bg-violet-300 top-[-10%] left-[-5%] animate-blob-morph" />
-      <div className="blob w-[600px] h-[600px] bg-fuchsia-200 top-[10%] right-[-10%] animate-blob-morph" style={{ animationDelay: "2s" }} />
-      <div className="blob w-[400px] h-[400px] bg-cyan-200 bottom-[5%] left-[30%] animate-blob-morph" style={{ animationDelay: "4s" }} />
-      <div className="blob w-[300px] h-[300px] bg-amber-100 top-[60%] right-[10%] animate-blob-morph" style={{ animationDelay: "6s" }} />
+    <main className="relative w-full overflow-x-hidden bg-gradient-to-b from-[#dbeafe] via-[#e0e7ff] to-[#ede9fe]">
+      {/* ─── Login button fixed top-right ─── */}
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110]">
+        {!isLoading && !isAuthenticated && (
+          <button
+            onClick={() => loginWithRedirect()}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+              bg-white/30 backdrop-blur-xl border border-white/40
+              text-white text-sm font-bold shadow-lg
+              hover:bg-white/50 hover:scale-105 active:scale-95
+              transition-all duration-300"
+            style={{
+              textShadow: "0 1px 3px rgba(0,0,0,0.2)",
+            }}
+          >
+            <LogIn className="w-4 h-4" />
+            Log In
+          </button>
+        )}
+      </div>
 
-      {/* ─── Content ─── */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-24 sm:pt-24 sm:pb-32">
-        {/* Auth Navbar */}
-        <div className="flex justify-end mb-8 stagger-children">
-          <AuthButtons />
+      {/* ─── Sticky title (appears after scrolling past hero) ─── */}
+      <StickyTitle />
+
+      {/* ─── Hero section ─── */}
+      <Hero />
+
+      {/* ─── Fish path overlay (full page) ─── */}
+      <ScrollFishPath />
+
+      {/* ─── Content sections ─── */}
+      <div className="relative z-10">
+        {/* Underwater decorative background for content area */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Subtle jellyfish blobs */}
+          <div
+            className="absolute w-64 h-80 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] opacity-[0.07]"
+            style={{
+              background:
+                "radial-gradient(ellipse, rgba(147,197,253,0.8), transparent 70%)",
+              top: "10%",
+              left: "5%",
+              animation: "float 12s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="absolute w-48 h-64 rounded-[50%_60%_30%_60%/30%_60%_70%_40%] opacity-[0.06]"
+            style={{
+              background:
+                "radial-gradient(ellipse, rgba(196,181,253,0.8), transparent 70%)",
+              top: "40%",
+              right: "8%",
+              animation: "float 10s ease-in-out 3s infinite",
+            }}
+          />
+          <div
+            className="absolute w-56 h-72 rounded-[40%_60%_60%_40%/50%_40%_60%_50%] opacity-[0.05]"
+            style={{
+              background:
+                "radial-gradient(ellipse, rgba(125,211,252,0.8), transparent 70%)",
+              top: "70%",
+              left: "15%",
+              animation: "float 14s ease-in-out 5s infinite",
+            }}
+          />
+
+          {/* Scattered bubble dots */}
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white/10"
+              style={{
+                width: 3 + Math.random() * 8,
+                height: 3 + Math.random() * 8,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+            />
+          ))}
         </div>
 
-        {/* ─── Hero ─── */}
-        <div className="text-center mb-16 stagger-children">
-          <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full glass-strong shadow-glass text-xs font-bold text-slate-600 mb-8 tracking-wide uppercase">
-            <Lock className="w-3.5 h-3.5 text-violet-600" />
-            100% On-Device · Zero Servers
-          </div>
+        {SECTIONS.map((section, i) => (
+          <FeatureSection key={i} index={i} {...section} />
+        ))}
 
-          <h1 className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter leading-[0.85] mb-8">
-            <span className="bg-clip-text text-transparent bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-400">
-              Voice
-            </span>
-            <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-br from-cyan-400 via-violet-500 to-fuchsia-600">
-              Vault
-            </span>
-          </h1>
-
-          <p className="text-slate-500 text-xl sm:text-2xl max-w-xl mx-auto leading-relaxed font-medium">
-            Voice journaling that never leaves your device.
-            <br className="hidden sm:block" />
-            <span className="text-slate-400">Clinical-grade. Edge-computed. Yours.</span>
+        {/* ─── Footer ─── */}
+        <footer className="relative z-10 py-16 text-center">
+          <p className="text-sm text-slate-400 font-medium">
+            VoiceVault &middot; Voice journaling that never leaves your device
           </p>
-        </div>
-
-        {/* ─── Bento Grid ─── */}
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-4 sm:gap-5 max-w-4xl mx-auto stagger-children">
-          
-          <UserProfile />
-
-          {/* Patient card — spans 5 cols on desktop */}
-          {(!isLoading && isAuthenticated) && (
-            <Link
-              href="/patient"
-              id="patient-link"
-              className="col-span-4 sm:col-span-5 group relative overflow-hidden rounded-4xl glass shadow-bento hover:shadow-bento-hover p-10 sm:p-12 transition-all duration-500 hover:-translate-y-1.5 active:scale-[0.98]"
-            >
-              {/* decorative blob behind the glass */}
-              <div className="absolute -top-20 -right-20 w-72 h-72 bg-violet-200 rounded-full blur-3xl opacity-0 group-hover:opacity-60 transition-opacity duration-700" />
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-200 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                  <Mic className="w-7 h-7 text-white" />
-                </div>
-                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-800 mb-3">
-                  Patient Vault
-                </h2>
-                <p className="text-slate-500 text-base sm:text-lg leading-relaxed font-medium max-w-sm mb-8">
-                  Speak for two minutes before bed. Your voice never leaves the device.
-                </p>
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white text-sm font-bold shadow-lg shadow-violet-200 group-hover:shadow-xl group-hover:shadow-violet-300 group-hover:scale-105 active:scale-95 transition-all duration-300">
-                  Start Recording
-                  <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-                </div>
-              </div>
-            </Link>
-          )}
-
-          {/* Provider card — spans 3 cols on desktop */}
-          {(!isLoading && isAuthenticated) && (
-            <Link
-              href="/provider"
-              id="provider-link"
-              className="col-span-4 sm:col-span-3 group relative overflow-hidden rounded-4xl glass shadow-bento hover:shadow-bento-hover p-10 sm:p-12 transition-all duration-500 hover:-translate-y-1.5 active:scale-[0.98]"
-            >
-              <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-cyan-200 rounded-full blur-3xl opacity-0 group-hover:opacity-60 transition-opacity duration-700" />
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-400 flex items-center justify-center shadow-lg shadow-cyan-200 mb-8 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
-                  <Activity className="w-7 h-7 text-white" />
-                </div>
-                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-800 mb-3">
-                  Provider<br />Dashboard
-                </h2>
-                <p className="text-slate-500 text-base leading-relaxed font-medium mb-8">
-                  90-second intake dossier. Replaces 5 hours.
-                </p>
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-teal-400 text-white text-sm font-bold shadow-lg shadow-cyan-200 group-hover:shadow-xl group-hover:shadow-cyan-300 group-hover:scale-105 active:scale-95 transition-all duration-300">
-                  Open Dashboard
-                  <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-                </div>
-              </div>
-            </Link>
-          )}
-
-          {/* Feature tiles — small bento squares */}
-          <div className="col-span-2 sm:col-span-3 rounded-4xl glass shadow-bento p-8 sm:p-10 flex flex-col justify-between group hover:shadow-bento-hover hover:-translate-y-1 transition-all duration-500 mt-5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-100 to-fuchsia-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Shield className="w-5 h-5 text-violet-600" />
-            </div>
-            <div>
-              <div className="text-4xl sm:text-5xl font-black tracking-tighter text-slate-800 mb-1">0</div>
-              <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Bytes uploaded</div>
-            </div>
-          </div>
-
-          <div className="col-span-2 sm:col-span-3 rounded-4xl glass shadow-bento p-8 sm:p-10 flex flex-col justify-between group hover:shadow-bento-hover hover:-translate-y-1 transition-all duration-500 mt-5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-100 to-teal-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Cpu className="w-5 h-5 text-cyan-600" />
-            </div>
-            <div>
-              <div className="text-4xl sm:text-5xl font-black tracking-tighter text-slate-800 mb-1">WebGPU</div>
-              <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">DistilBERT in-browser</div>
-            </div>
-          </div>
-
-          <div className="col-span-4 sm:col-span-2 rounded-4xl glass shadow-bento p-8 sm:p-10 flex flex-col justify-between group hover:shadow-bento-hover hover:-translate-y-1 transition-all duration-500 mt-5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Database className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <div className="text-2xl sm:text-3xl font-black tracking-tighter text-slate-800 mb-1">IndexedDB</div>
-              <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Sandboxed vault</div>
-            </div>
-          </div>
-
-        </div>
+          <p className="text-xs text-slate-300 mt-2">
+            100% on-device &middot; Zero servers &middot; Your data, your vault
+          </p>
+        </footer>
       </div>
     </main>
   );
