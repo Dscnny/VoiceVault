@@ -127,3 +127,103 @@ html, body {
 html {
   scroll-behavior: smooth;
 }
+
+/* ═══════════════════════════════════════════════
+   Vault Page — Dreamy Underwater Dashboard
+   ═══════════════════════════════════════════════ */
+
+/* ─── Title glow ─── */
+.vault-title {
+  text-shadow:
+    0 0 40px rgba(130, 120, 255, 0.25),
+    0 0 80px rgba(100, 80, 220, 0.10),
+    0 2px 4px rgba(0, 0, 0, 0.20);
+}
+
+/* ─── Card background ─── */
+.vault-card-bg {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(25, 20, 70, 0.75) 0%,
+      rgba(30, 25, 80, 0.65) 50%,
+      rgba(20, 30, 75, 0.70) 100%
+    );
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Card hover glow overlay ─── */
+.vault-card-glow {
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(120, 100, 255, 0.12) 0%,
+      transparent 70%
+    );
+}
+
+/* ─── Card hover transform ─── */
+.vault-card {
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.35s ease;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+.vault-card:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.25),
+    0 0 30px rgba(100, 80, 220, 0.10);
+}
+
+/* ─── Floating bubbles animation ─── */
+.vault-bubble {
+  animation: vault-bubble-rise linear infinite;
+}
+
+@keyframes vault-bubble-rise {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.4);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-110vh) translateX(20px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* ─── Sparkle twinkle animation ─── */
+.vault-sparkle {
+  animation: vault-sparkle-twinkle ease-in-out infinite;
+}
+
+@keyframes vault-sparkle-twinkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+/* ─── Vault page subtle grain overlay ─── */
+.vault-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}

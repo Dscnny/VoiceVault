@@ -27,9 +27,17 @@ export default function TypingPage() {
     <main className="min-h-screen relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #dbeafe 0%, #d4e4fe 50%, #ede9fe 100%)" }}>
       <div className="blob w-[400px] h-[400px] bg-blue-200 top-[-5%] left-[20%]" />
       <div className="relative z-10 max-w-2xl mx-auto px-6 pt-12 pb-24">
-        <Link href="/vault" className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-cyan-600 mb-10 group">
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Vault
-        </Link>
+        <div className="flex items-center justify-between mb-10">
+          <Link
+            href="/"
+            className="inline-flex items-center font-black tracking-tight text-blue-600 hover:text-cyan-600 text-lg transition-colors"
+          >
+            VoiceVault
+          </Link>
+          <Link href="/vault" className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-cyan-600 group">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Vault
+          </Link>
+        </div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
           <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-xl shadow-blue-200 mx-auto mb-8">
             <PenLine className="w-10 h-10 text-white" />

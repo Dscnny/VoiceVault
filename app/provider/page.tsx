@@ -92,10 +92,9 @@ export default function ProviderPage() {
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-2 font-bold text-cyan-600 hover:text-teal-600 text-sm transition-colors group"
+            className="inline-flex items-center font-black tracking-tight text-cyan-600 hover:text-teal-600 text-lg transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Home
+            VoiceVault
           </Link>
           <div className="flex items-center gap-3">
             <select
