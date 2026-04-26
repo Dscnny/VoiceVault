@@ -62,4 +62,8 @@ export interface RecordingController {
   stop(): Promise<TranscriptionResult>;
   /** Cancel the recording without producing a result. */
   cancel(): void;
+  /** Pause the active recording session. */
+  pause?(): void;
+  /** Resume a paused recording session. */
+  resume?(): void;
 }
