@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-import { LogIn } from "lucide-react";
+import { LogIn, Mic, Brain, Keyboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import Hero from "@/components/landing/Hero";
 import FeatureSection from "@/components/landing/FeatureSection";
@@ -119,6 +119,79 @@ export default function LandingPage() {
         {SECTIONS.map((section, i) => (
           <FeatureSection key={i} index={i} {...section} />
         ))}
+
+        {/* ─── Quick access cards ─── */}
+        <section className="max-w-4xl mx-auto px-6 py-16">
+          <h2 className="text-center text-3xl font-black tracking-tight text-slate-800 mb-3">
+            Jump right in
+          </h2>
+          <p className="text-center text-slate-400 text-base mb-10">
+            Choose how you want to check in today.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+            {/* Patient Vault */}
+            <Link
+              href="/patient"
+              className="block group rounded-3xl glass shadow-bento p-8 hover:shadow-bento-hover hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
+            >
+              <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-2xl opacity-25 bg-gradient-to-br from-violet-400 to-fuchsia-400" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Mic className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-slate-800 mb-1.5">Patient Vault</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                  Speak your thoughts aloud and let the app listen, analyze, and save them privately.
+                </p>
+                <span className="text-sm font-bold text-accent group-hover:text-accent-hover transition-colors">
+                  Open →
+                </span>
+              </div>
+            </Link>
+
+            {/* Provider Dashboard */}
+            <Link
+              href="/provider"
+              className="block group rounded-3xl glass shadow-bento p-8 hover:shadow-bento-hover hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
+            >
+              <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-2xl opacity-25 bg-gradient-to-br from-emerald-400 to-teal-400" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Brain className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-slate-800 mb-1.5">Provider Dashboard</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                  Review mood trends, keywords, and sentiment patterns across journal entries.
+                </p>
+                <span className="text-sm font-bold text-emerald-600 group-hover:text-emerald-700 transition-colors">
+                  Open →
+                </span>
+              </div>
+            </Link>
+
+            {/* Typing Journal */}
+            <Link
+              href="/typing"
+              className="block group rounded-3xl glass shadow-bento p-8 hover:shadow-bento-hover hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
+            >
+              <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-2xl opacity-25 bg-gradient-to-br from-blue-400 to-cyan-400" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Keyboard className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-slate-800 mb-1.5">Typing Journal</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                  Type through words of affirmation. A quieter way to check in when you can&apos;t speak out loud.
+                </p>
+                <span className="text-sm font-bold text-blue-400 group-hover:text-blue-500 transition-colors">
+                  Open →
+                </span>
+              </div>
+            </Link>
+
+          </div>
+        </section>
 
         {/* ─── Footer with anchor & seaweed ─── */}
         <footer className="relative z-10 pt-12 pb-20 text-center overflow-hidden">

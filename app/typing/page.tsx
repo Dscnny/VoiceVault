@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useServices } from "@/lib/serviceContainer";
@@ -16,9 +14,7 @@ import type { JournalEntry } from "@/types/JournalEntry";
 
 type Phase = "idle" | "typing" | "complete" | "analyzing";
 
-export default function VaultTypingPage() {
-  const { user, isAuthenticated, isLoading } = useAuth0();
-  const router = useRouter();
+export default function TypingPage() {
   const services = useServices();
   const [quote, setQuote] = useState<string>(() => getRandomQuote());
   const [typed, setTyped] = useState("");
@@ -27,12 +23,9 @@ export default function VaultTypingPage() {
   const [empathy, setEmpathy] = useState<EmpathyResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Ref for phase — lets the keydown handler read current phase without stale closure
   const phaseRef = useRef<Phase>(phase);
   phaseRef.current = phase;
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.replace("/");
-  }, [isLoading, isAuthenticated, router]);
 
   const loadNewQuote = useCallback(() => {
     setQuote(getRandomQuote());
@@ -43,6 +36,7 @@ export default function VaultTypingPage() {
     setError(null);
   }, []);
 
+  // Window keydown listener — re-registers only when quote changes (on reset)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const current = phaseRef.current;
@@ -70,6 +64,9 @@ export default function VaultTypingPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [quote, loadNewQuote]);
 
+  // Completion detection — triggers analysis when all characters are typed.
+  // Uses phaseRef (not phase as dep) to avoid cancelling in-flight async work
+  // when setPhase("analyzing") causes a re-render.
   useEffect(() => {
     if (phaseRef.current !== "typing" || typed.length !== quote.length) return;
 
@@ -91,7 +88,6 @@ export default function VaultTypingPage() {
 
         const entry: JournalEntry = {
           id: crypto.randomUUID(),
-          userId: user?.sub,
           timestamp: new Date(),
           rawTranscript: quote,
           sentimentScore: sr.score,
@@ -111,16 +107,10 @@ export default function VaultTypingPage() {
     };
 
     run();
-    return () => { cancelled = true; };
-  }, [typed, quote, services, user]);
-
-  if (isLoading || !isAuthenticated) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 animate-pulse shadow-lg shadow-blue-200" />
-      </main>
-    );
-  }
+    return () => {
+      cancelled = true;
+    };
+  }, [typed, quote, services]);
 
   const accuracy =
     typed.length > 0 && quote.length > 0
@@ -133,19 +123,27 @@ export default function VaultTypingPage() {
 
   return (
     <main className="min-h-screen relative overflow-hidden">
+      {/* Background blobs */}
       <div className="blob w-[400px] h-[400px] bg-blue-200 top-[-5%] right-[10%] animate-blob-morph" />
-      <div className="blob w-[350px] h-[350px] bg-violet-200 bottom-[10%] left-[-5%] animate-blob-morph" />
+      <div
+        className="blob w-[350px] h-[350px] bg-violet-200 bottom-[10%] left-[-5%] animate-blob-morph"
+        style={{ animationDelay: "3s" }}
+      />
+      <div
+        className="blob w-[300px] h-[300px] bg-cyan-100 top-[40%] right-[-5%] animate-blob-morph"
+        style={{ animationDelay: "5s" }}
+      />
 
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-8 pb-24 sm:pt-12">
 
         {/* ─── Nav bar ─── */}
         <div className="flex items-center justify-between mb-12 glass-strong rounded-2xl px-6 py-3.5 shadow-glass">
           <Link
-            href="/vault"
+            href="/"
             className="inline-flex items-center gap-2 font-bold text-blue-500 hover:text-blue-600 text-sm transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Vault
+            Home
           </Link>
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
             Typing Journal
@@ -155,8 +153,8 @@ export default function VaultTypingPage() {
         {/* ─── IDLE phase ─── */}
         {phase === "idle" && (
           <div className="space-y-10">
-            <div className="text-center">
-              <h1 className="text-5xl sm:text-6xl font-black tracking-tighter text-slate-800 leading-[0.9] mb-4">
+            <div className="text-center animate-fade-in-up">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter text-slate-800 leading-[0.9] mb-4">
                 Words of
                 <br />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-violet-500 to-fuchsia-500">
@@ -215,6 +213,7 @@ export default function VaultTypingPage() {
               <TypingQuote quote={quote} typed={typed} isComplete={true} />
             </div>
 
+            {/* Accuracy */}
             <div className="glass rounded-3xl shadow-glass px-8 py-5 flex items-center justify-between">
               <span className="text-text-tertiary text-sm font-bold uppercase tracking-wider">
                 Accuracy
@@ -224,20 +223,24 @@ export default function VaultTypingPage() {
               </span>
             </div>
 
+            {/* Error */}
             {error && (
               <div className="rounded-3xl border border-rose-200/60 bg-rose-50/60 text-rose-600 p-5 text-sm font-semibold">
                 {error}
               </div>
             )}
 
+            {/* Sentiment badge */}
             {sentiment && (
               <div className="flex justify-center">
                 <SentimentBadge score={sentiment.score} />
               </div>
             )}
 
+            {/* Nudge card */}
             {empathy && <NudgeCard response={empathy} />}
 
+            {/* Try another */}
             <button
               onClick={loadNewQuote}
               className="w-full rounded-xl border border-border bg-bg-card hover:bg-bg-elevated transition-colors py-4 font-bold text-text-secondary text-sm"
