@@ -20,25 +20,25 @@ const SECTIONS = [
   {
     title: "A space between sessions",
     body: "Therapy does not end after one hour. VoiceVault helps you reflect, process, and capture what happens between appointments.",
-    buttons: [{ label: "Start talking" }, { label: "See how it works" }],
+    buttons: [],
     cardVariant: "microphone" as const,
   },
   {
     title: "When thoughts don\u2019t wait",
     body: "Late nights, stressful moments, and emotional check-ins can be saved before they disappear.",
-    buttons: [{ label: "Open vault" }, { label: "Learn more" }],
+    buttons: [],
     cardVariant: "mood" as const,
   },
   {
     title: "Patterns, not just moments",
     body: "VoiceVault turns conversations into gentle summaries, mood trends, and therapist-ready insights.",
-    buttons: [{ label: "View insights" }, { label: "See demo" }],
+    buttons: [],
     cardVariant: "therapist" as const,
   },
   {
     title: "Guided, not alone",
     body: "A calm fish companion guides users through reflection and makes progress feel visual, gentle, and alive.",
-    buttons: [{ label: "Meet your guide" }, { label: "Start reflection" }],
+    buttons: [],
     cardVariant: "reflection" as const,
   },
 ];
@@ -53,7 +53,12 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <main className="relative w-full overflow-x-hidden bg-gradient-to-b from-[#dbeafe] via-[#e0e7ff] to-[#ede9fe]">
+    <main
+      className="relative w-full overflow-x-hidden"
+      style={{
+        background: "linear-gradient(to bottom, #dbeafe 0%, #d4e4fe 15%, #cdd9fe 30%, #d5d3fe 50%, #ddd6fe 70%, #e4dff8 85%, #ede9fe 100%)",
+      }}
+    >
       {/* ─── Login button fixed top-right ─── */}
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110]">
         <AuthButtons />
@@ -70,50 +75,36 @@ export default function LandingPage() {
 
       {/* ─── Content sections ─── */}
       <div className="relative z-10">
-        {/* Underwater decorative background for content area */}
+        {/* Underwater decorative background — kept minimal */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Subtle jellyfish blobs */}
           <div
-            className="absolute w-64 h-80 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] opacity-[0.07]"
+            className="absolute w-64 h-80 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] opacity-[0.06]"
             style={{
-              background:
-                "radial-gradient(ellipse, rgba(147,197,253,0.8), transparent 70%)",
-              top: "10%",
+              background: "radial-gradient(ellipse, rgba(147,197,253,0.8), transparent 70%)",
+              top: "8%",
               left: "5%",
               animation: "float 12s ease-in-out infinite",
             }}
           />
           <div
-            className="absolute w-48 h-64 rounded-[50%_60%_30%_60%/30%_60%_70%_40%] opacity-[0.06]"
+            className="absolute w-48 h-64 rounded-[50%_60%_30%_60%/30%_60%_70%_40%] opacity-[0.05]"
             style={{
-              background:
-                "radial-gradient(ellipse, rgba(196,181,253,0.8), transparent 70%)",
-              top: "40%",
+              background: "radial-gradient(ellipse, rgba(196,181,253,0.8), transparent 70%)",
+              top: "45%",
               right: "8%",
               animation: "float 10s ease-in-out 3s infinite",
             }}
           />
-          <div
-            className="absolute w-56 h-72 rounded-[40%_60%_60%_40%/50%_40%_60%_50%] opacity-[0.05]"
-            style={{
-              background:
-                "radial-gradient(ellipse, rgba(125,211,252,0.8), transparent 70%)",
-              top: "70%",
-              left: "15%",
-              animation: "float 14s ease-in-out 5s infinite",
-            }}
-          />
-
-          {/* Scattered bubble dots */}
-          {mounted && [...Array(20)].map((_, i) => (
+          {/* Subtle scattered bubbles */}
+          {mounted && [...Array(8)].map((_, i) => (
             <div
               key={i}
-              className="absolute rounded-full bg-white/10"
+              className="absolute rounded-full bg-white/8"
               style={{
-                width: 3 + Math.random() * 8,
-                height: 3 + Math.random() * 8,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                width: 3 + Math.random() * 6,
+                height: 3 + Math.random() * 6,
+                left: `${10 + Math.random() * 80}%`,
+                top: `${10 + Math.random() * 80}%`,
               }}
             />
           ))}
@@ -123,12 +114,38 @@ export default function LandingPage() {
           <FeatureSection key={i} index={i} {...section} />
         ))}
 
-        {/* ─── Footer ─── */}
-        <footer className="relative z-10 py-16 text-center">
-          <p className="text-sm text-slate-400 font-medium">
+        {/* ─── Footer with anchor & seaweed ─── */}
+        <footer className="relative z-10 pt-12 pb-20 text-center overflow-hidden">
+          {/* Anchor & Seaweed decoration */}
+          <div className="flex items-end justify-center gap-5 mb-8 pointer-events-none" aria-hidden="true">
+            {/* Left seaweed */}
+            <svg width="24" height="70" viewBox="0 0 28 80" fill="none" className="opacity-35">
+              <path d="M14 80 Q4 65, 14 50 Q24 35, 14 20 Q8 10, 12 0" stroke="#86efac" strokeWidth="3.5" fill="none" strokeLinecap="round" style={{ animation: "seaweedSway 4s ease-in-out infinite" }} />
+              <path d="M20 80 Q28 62, 20 45 Q12 30, 18 14" stroke="#6ee7b7" strokeWidth="2.5" fill="none" strokeLinecap="round" style={{ animation: "seaweedSway 5s ease-in-out 1s infinite" }} />
+            </svg>
+
+            {/* Red anchor */}
+            <svg width="36" height="50" viewBox="0 0 48 64" fill="none" className="opacity-45">
+              <circle cx="24" cy="10" r="5" stroke="#f87171" strokeWidth="2.5" fill="none" />
+              <line x1="24" y1="15" x2="24" y2="50" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="14" y1="26" x2="34" y2="26" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M10 50 Q10 40, 24 40" stroke="#f87171" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              <path d="M38 50 Q38 40, 24 40" stroke="#f87171" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              <circle cx="10" cy="50" r="2" fill="#f87171" />
+              <circle cx="38" cy="50" r="2" fill="#f87171" />
+            </svg>
+
+            {/* Right seaweed */}
+            <svg width="24" height="70" viewBox="0 0 28 80" fill="none" className="opacity-35">
+              <path d="M14 80 Q24 65, 14 50 Q4 35, 14 20 Q20 10, 16 0" stroke="#86efac" strokeWidth="3.5" fill="none" strokeLinecap="round" style={{ animation: "seaweedSway 4.5s ease-in-out 0.5s infinite" }} />
+              <path d="M8 80 Q0 62, 8 45 Q16 30, 10 14" stroke="#6ee7b7" strokeWidth="2.5" fill="none" strokeLinecap="round" style={{ animation: "seaweedSway 5.5s ease-in-out 1.5s infinite" }} />
+            </svg>
+          </div>
+
+          <p className="text-sm text-slate-500 font-semibold">
             VoiceVault &middot; Voice journaling that never leaves your device
           </p>
-          <p className="text-xs text-slate-300 mt-2">
+          <p className="text-xs text-slate-400 mt-1.5">
             100% on-device &middot; Zero servers &middot; Your data, your vault
           </p>
         </footer>

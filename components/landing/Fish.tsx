@@ -53,10 +53,10 @@ export default function Fish({ size = 1, className = "" }: FishProps) {
         transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* ─── Body ─── */}
-      <ellipse cx="38" cy="25" rx="28" ry="16" fill="url(#bodyGrad)" />
+      {/* ─── Body (rounder for cute look) ─── */}
+      <ellipse cx="38" cy="25" rx="26" ry="18" fill="url(#bodyGrad)" />
       {/* body sheen */}
-      <ellipse cx="42" cy="20" rx="18" ry="8" fill="rgba(255,255,255,0.18)" />
+      <ellipse cx="40" cy="19" rx="16" ry="9" fill="rgba(255,255,255,0.22)" />
 
       {/* ─── Dorsal fin ─── */}
       <motion.path
@@ -87,28 +87,35 @@ export default function Fish({ size = 1, className = "" }: FishProps) {
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
       />
 
-      {/* ─── Eye ─── */}
-      <circle cx="56" cy="22" r="4" fill="white" />
-      <circle cx="57.5" cy="21.5" r="2.2" fill="#1e293b" />
-      <circle cx="58.5" cy="20.5" r="0.8" fill="white" />
+      {/* ─── Blush cheek ─── */}
+      <circle cx="48" cy="29" r="3.5" fill="#fca5a5" opacity="0.3" />
 
-      {/* ─── Mouth line ─── */}
-      <path d="M64 27 Q66 28, 64 30" stroke="#7e8fa6" strokeWidth="1" fill="none" strokeLinecap="round" />
+      {/* ─── Eye (bigger, cuter) ─── */}
+      <circle cx="54" cy="21" r="5.5" fill="white" />
+      <circle cx="55.5" cy="20" r="3" fill="#1e293b" />
+      <circle cx="56.5" cy="19" r="1.2" fill="white" />
 
-      {/* ─── Gradient definitions ─── */}
+      {/* ─── Mouth (gentle smile) ─── */}
+      <path d="M62 27 Q64 29.5, 61 30" stroke="#94a3b8" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+
+      {/* ─── Tiny bubbles ─── */}
+      <circle cx="67" cy="22" r="1.5" fill="rgba(147,197,253,0.25)" stroke="rgba(147,197,253,0.35)" strokeWidth="0.5" />
+      <circle cx="70" cy="19" r="1" fill="rgba(147,197,253,0.2)" stroke="rgba(147,197,253,0.3)" strokeWidth="0.5" />
+
+      {/* ─── Gradient definitions (softer pastels) ─── */}
       <defs>
         <linearGradient id="bodyGrad" x1="10" y1="10" x2="66" y2="40">
-          <stop offset="0%" stopColor="#93c5fd" />
-          <stop offset="50%" stopColor="#818cf8" />
-          <stop offset="100%" stopColor="#a78bfa" />
+          <stop offset="0%" stopColor="#a5d8ff" />
+          <stop offset="50%" stopColor="#91a7ff" />
+          <stop offset="100%" stopColor="#b197fc" />
         </linearGradient>
         <linearGradient id="tailGrad" x1="0" y1="10" x2="8" y2="40">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="100%" stopColor="#7dd3fc" />
+          <stop offset="0%" stopColor="#b197fc" />
+          <stop offset="100%" stopColor="#99e9f2" />
         </linearGradient>
         <linearGradient id="finGrad" x1="30" y1="0" x2="48" y2="12">
-          <stop offset="0%" stopColor="#c4b5fd" />
-          <stop offset="100%" stopColor="#7dd3fc" />
+          <stop offset="0%" stopColor="#d0bfff" />
+          <stop offset="100%" stopColor="#99e9f2" />
         </linearGradient>
       </defs>
     </motion.svg>

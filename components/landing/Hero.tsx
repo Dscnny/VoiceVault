@@ -47,8 +47,8 @@ export default function Hero() {
         />
         {/* Soft blue overlay for readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-[rgba(30,58,138,0.35)] via-[rgba(59,130,246,0.2)] to-[rgba(147,197,253,0.3)]" />
-        {/* Bottom fade to content area */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#dbeafe] to-transparent" />
+        {/* Bottom fade to content area — tall for smooth depth transition */}
+        <div className="absolute bottom-0 left-0 right-0 h-72 bg-gradient-to-t from-[#dbeafe] via-[#dbeafe]/80 to-transparent" />
       </motion.div>
 
       {/* ─── Floating decorative elements ─── */}

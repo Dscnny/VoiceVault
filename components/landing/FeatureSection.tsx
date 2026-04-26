@@ -54,20 +54,22 @@ export default function FeatureSection({
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed mb-8 font-medium">
             {body}
           </p>
-          <div className="flex flex-wrap gap-3">
-            {buttons.map((btn, i) => (
-              <button
-                key={i}
-                className={`px-6 py-3 rounded-full text-sm font-bold transition-all duration-300 active:scale-95 ${
-                  i === 0
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 hover:scale-105"
-                    : "bg-white/60 backdrop-blur-md border border-white/40 text-slate-700 shadow-sm hover:bg-white/80 hover:shadow-md"
-                }`}
-              >
-                {btn.label}
-              </button>
-            ))}
-          </div>
+          {buttons.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {buttons.map((btn, i) => (
+                <button
+                  key={i}
+                  className={`px-6 py-3 rounded-full text-sm font-bold transition-all duration-300 active:scale-95 ${
+                    i === 0
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 hover:scale-105"
+                      : "bg-white/60 backdrop-blur-md border border-white/40 text-slate-700 shadow-sm hover:bg-white/80 hover:shadow-md"
+                  }`}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* ─── Visual card column ─── */}

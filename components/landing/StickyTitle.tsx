@@ -17,15 +17,16 @@ export default function StickyTitle() {
       className="fixed top-0 left-0 z-[100] px-6 py-4 pointer-events-none"
       style={{ opacity }}
     >
-      <span
-        className="text-2xl sm:text-3xl font-black tracking-tighter text-white select-none"
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className="pointer-events-auto text-2xl sm:text-3xl font-black tracking-tighter text-white select-none cursor-pointer hover:opacity-80 transition-opacity duration-300"
         style={{
           textShadow:
             "0 0 30px rgba(147,197,253,0.4), 0 2px 10px rgba(0,0,0,0.2)",
         }}
       >
         voicevault
-      </span>
+      </button>
     </motion.div>
   );
 }

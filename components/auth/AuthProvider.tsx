@@ -1,8 +1,11 @@
 "use client";
 
 import { Auth0Provider } from "@auth0/auth0-react";
+import { useRouter } from "next/navigation";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
   if (typeof window === "undefined") {
     // During SSR, just render children without Auth0 tracking
     // The Auth0 state will initialize once hydrated on the client
@@ -15,6 +18,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clientId="NGU75LwhROhRhgRRHbNgDe4TN3M0eTP0"
       authorizationParams={{
         redirect_uri: window.location.origin,
+      }}
+      onRedirectCallback={(appState) => {
+        router.replace(appState?.returnTo || "/vault");
       }}
     >
       {children}
