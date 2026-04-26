@@ -47,4 +47,12 @@ export interface IntakeCheatSheet {
   averageSentiment: number;
   minimumSentiment: number;
   maximumSentiment: number;
+  /** Claude-generated SOAP-lite narrative for the provider. Optional — absent in fallback mode. */
+  soapNarrative?: string;
+  /** Dominant emotional theme across the analysis period. Optional — absent in fallback mode. */
+  dominantTheme?: string;
+  /** Most important topic for the provider to address in the upcoming session. Optional. */
+  priorityFocus?: string;
+  /** Risk flags: crisis-level sentiment, self-harm language, medication concerns. Optional. */
+  riskFlags?: string[];
 }

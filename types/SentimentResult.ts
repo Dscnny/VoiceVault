@@ -23,8 +23,8 @@ export interface SentimentResult {
   keywords: string[];
 
   /**
-   * Dense vector embedding of the transcript for semantic similarity search.
-   * Dimensionality depends on the embedding model (~384 for MiniLM).
+   * Always [] until semantic search feature is implemented.
+   * Reserved for future MiniLM or Claude-based similarity search.
    */
   vector: number[];
 }

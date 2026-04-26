@@ -89,8 +89,13 @@ export default function PatientPage() {
       const sentimentResult = await services.intelligence.analyze(finalText);
       setSentiment(sentimentResult);
 
-      // Generate empathetic nudge
-      const empathyResult = await services.empathy.generateResponse(sentimentResult);
+      // Generate empathetic nudge — cast through unknown so the optional
+      // transcript arg (added in ClaudeEmpathyService) can be passed without
+      // modifying the locked EmpathyService interface.
+      const empathyService = services.empathy as unknown as {
+        generateResponse(r: SentimentResult, t?: string): Promise<EmpathyResponse>;
+      };
+      const empathyResult = await empathyService.generateResponse(sentimentResult, finalText);
       setEmpathy(empathyResult);
 
       // Persist

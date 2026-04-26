@@ -34,6 +34,8 @@ import { TransformersIntelligenceService } from "@/services/real/TransformersInt
 import { DexieStorageService } from "@/services/real/DexieStorageService";
 import { RuleBasedEmpathyService } from "@/services/real/RuleBasedEmpathyService";
 import { RealIntakeService } from "@/services/real/RealIntakeService";
+import { ClaudeEmpathyService } from "@/services/real/ClaudeEmpathyService";
+import { ClaudeIntakeService } from "@/services/real/ClaudeIntakeService";
 
 export interface ServiceContainer {
   transcription: AudioTranscriptionService;
@@ -74,8 +76,8 @@ export function buildServices(mode: ServiceMode): ServiceContainer {
     transcription: new WebSpeechTranscriptionService(),
     intelligence: new TransformersIntelligenceService(),
     storage,
-    empathy: new RuleBasedEmpathyService(),
-    intake: new RealIntakeService(storage),
+    empathy: new ClaudeEmpathyService(),
+    intake: new ClaudeIntakeService(storage),
   };
 }
 
