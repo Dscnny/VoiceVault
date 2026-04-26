@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useServices } from "@/lib/serviceContainer";
 import { RecordButton, type RecordState } from "@/components/patient/RecordButton";
 import { TranscriptDisplay } from "@/components/patient/TranscriptDisplay";
@@ -13,6 +14,11 @@ import type { RecordingController } from "@/services/interfaces/AudioTranscripti
 import type { JournalEntry } from "@/types/JournalEntry";
 import type { SentimentResult } from "@/types/SentimentResult";
 import type { EmpathyResponse } from "@/types/Empathy";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30, scale: 0.97 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 100, damping: 20 } },
+};
 
 export default function PatientPage() {
   const services = useServices();
@@ -121,59 +127,141 @@ export default function PatientPage() {
   const isLive = state === "recording";
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+    <main className="min-h-screen relative overflow-hidden">
+      {/* Background blobs */}
+      <div className="blob w-[400px] h-[400px] bg-violet-200 top-[-5%] right-[10%] animate-blob-morph" />
+      <div className="blob w-[350px] h-[350px] bg-fuchsia-200 bottom-[10%] left-[-5%] animate-blob-morph" style={{ animationDelay: "3s" }} />
+      <div className="blob w-[300px] h-[300px] bg-cyan-100 top-[40%] right-[-5%] animate-blob-morph" style={{ animationDelay: "5s" }} />
+
+      <div className="relative z-10 max-w-3xl mx-auto px-6 pt-8 pb-24 sm:pt-12">
+
+        {/* ─── Nav bar ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between mb-12 glass-strong rounded-2xl px-6 py-3.5 shadow-glass"
+        >
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-text-secondary hover:text-text-primary text-sm transition-colors"
+            className="inline-flex items-center gap-2 font-bold text-violet-600 hover:text-fuchsia-600 text-sm transition-colors group"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Home
           </Link>
-          <div className="text-xs text-text-tertiary tabular-nums">
-            {warmupStatus === "pending" && "Loading models…"}
-            {warmupStatus === "ready" && "Models ready · on-device"}
-            {warmupStatus === "failed" && "Using fallback intelligence"}
+          <div className="flex items-center gap-2.5 text-xs font-bold tabular-nums uppercase tracking-wider">
+            <span className={`w-2 h-2 rounded-full ${
+              warmupStatus === "ready" ? "bg-emerald-400" :
+              warmupStatus === "pending" ? "bg-amber-400 animate-pulse" : "bg-slate-300"
+            }`} />
+            <span className="text-slate-500">
+              {warmupStatus === "pending" && "Loading models…"}
+              {warmupStatus === "ready" && "On-device · ready"}
+              {warmupStatus === "failed" && "Fallback mode"}
+            </span>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-semibold tracking-tight mb-2">
-            How are you doing tonight?
+        {/* ─── Hero text ─── */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          className="text-center mb-16"
+        >
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter text-slate-800 leading-[0.9] mb-4">
+            How are you
+            <br />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400">
+              doing tonight?
+            </span>
           </h1>
-          <p className="text-text-secondary text-sm">
+          <p className="text-slate-400 text-lg sm:text-xl font-medium">
             Speak for as long as you'd like. Nothing leaves this device.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="mb-10 flex justify-center">
+        {/* ─── The Orb ─── */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          transition={{ delay: 0.1 }}
+          className="flex justify-center mb-16"
+        >
           <RecordButton state={state} onClick={handleClick} />
-        </div>
+        </motion.div>
 
-        {error && (
-          <div className="mb-6 rounded-xl border border-sentiment-crisis/30 bg-sentiment-crisis/10 text-sentiment-crisis p-4 text-sm flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <div>{error}</div>
-          </div>
-        )}
+        {/* ─── Error ─── */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              className="mb-8 rounded-3xl border border-rose-200/60 bg-rose-50/60 backdrop-blur-xl text-rose-600 p-6 text-sm font-semibold flex items-start gap-3 shadow-glass"
+            >
+              <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              <div>{error}</div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {(displayTranscript || isLive) && (
-          <div className="mb-4">
-            <TranscriptDisplay transcript={displayTranscript} isLive={isLive} />
-          </div>
-        )}
+        {/* ─── Transcript + Results Bento ─── */}
+        <AnimatePresence>
+          {(displayTranscript || isLive) && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: "spring", stiffness: 100, damping: 20 }}
+              className="mb-8"
+            >
+              <TranscriptDisplay transcript={displayTranscript} isLive={isLive} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {sentiment && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between rounded-2xl border border-border bg-bg-card px-5 py-4">
-              <div className="text-sm text-text-secondary">Sentiment</div>
-              <SentimentBadge score={sentiment.score} />
-            </div>
-            {empathy && <NudgeCard response={empathy} />}
-            <KeywordPills keywords={sentiment.keywords} />
-          </div>
-        )}
+        <AnimatePresence>
+          {sentiment && (
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 80, damping: 20, delay: 0.1 }}
+            >
+              {/* Bento grid for results */}
+              <div className="grid grid-cols-4 gap-4">
+                {/* Sentiment score — big tile */}
+                <div className="col-span-4 sm:col-span-2 rounded-4xl glass shadow-bento p-10 relative overflow-hidden group hover:shadow-bento-hover transition-all duration-500">
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-100 rounded-full blur-3xl opacity-40" />
+                  <div className="relative z-10">
+                    <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Sentiment</div>
+                    <div className={`text-6xl sm:text-7xl font-black tabular-nums tracking-tighter mb-3 ${
+                      sentiment.score > 0.25 ? "text-emerald-600" :
+                      sentiment.score < -0.25 ? "text-rose-600" : "text-slate-800"
+                    }`}>
+                      {sentiment.score >= 0 ? "+" : ""}{sentiment.score.toFixed(2)}
+                    </div>
+                    <SentimentBadge score={sentiment.score} />
+                  </div>
+                </div>
+
+                {/* Keywords — smaller tiles */}
+                <div className="col-span-4 sm:col-span-2 rounded-4xl glass shadow-bento p-10 relative overflow-hidden">
+                  <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-cyan-100 rounded-full blur-3xl opacity-40" />
+                  <KeywordPills keywords={sentiment.keywords} />
+                </div>
+
+                {/* Nudge — full width */}
+                {empathy && (
+                  <div className="col-span-4">
+                    <NudgeCard response={empathy} />
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </div>
     </main>
   );
