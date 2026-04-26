@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {},
 
   // transformers.js depends on onnxruntime-node (native binary) and sharp (image
   // processing) on the server side, but in our app it only ever runs in the

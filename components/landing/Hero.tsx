@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /**
  * Full-viewport hero section with the underwater background image.
@@ -10,6 +10,12 @@ import { useRef } from "react";
  */
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -48,7 +54,7 @@ export default function Hero() {
       {/* ─── Floating decorative elements ─── */}
       {/* Bubble particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(12)].map((_, i) => (
+        {mounted && [...Array(12)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute rounded-full"

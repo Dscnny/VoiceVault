@@ -3,9 +3,11 @@
 import dynamic from "next/dynamic";
 
 import { LogIn } from "lucide-react";
+import { useState, useEffect } from "react";
 import Hero from "@/components/landing/Hero";
 import StickyTitle from "@/components/landing/StickyTitle";
 import FeatureSection from "@/components/landing/FeatureSection";
+import { AuthButtons } from "@/components/auth/AuthButtons";
 
 // Dynamic import to avoid SSR issues with getPointAtLength
 const ScrollFishPath = dynamic(
@@ -44,19 +46,18 @@ const SECTIONS = [
 import Link from "next/link";
 
 export default function LandingPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <main className="relative w-full overflow-x-hidden bg-gradient-to-b from-[#dbeafe] via-[#e0e7ff] to-[#ede9fe]">
       {/* ─── Login button fixed top-right ─── */}
-      <Link
-        href="/login"
-        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/30 backdrop-blur-xl border border-white/40 text-white text-sm font-bold shadow-lg hover:bg-white/50 hover:scale-105 active:scale-95 transition-all duration-300"
-        style={{
-          textShadow: "0 1px 3px rgba(0,0,0,0.2)",
-        }}
-      >
-        <LogIn className="w-4 h-4" />
-        Log In
-      </Link>
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110]">
+        <AuthButtons />
+      </div>
 
       {/* ─── Sticky title (appears after scrolling past hero) ─── */}
       <StickyTitle />
@@ -104,7 +105,7 @@ export default function LandingPage() {
           />
 
           {/* Scattered bubble dots */}
-          {[...Array(20)].map((_, i) => (
+          {mounted && [...Array(20)].map((_, i) => (
             <div
               key={i}
               className="absolute rounded-full bg-white/10"
