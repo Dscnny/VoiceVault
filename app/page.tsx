@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { LogIn, Mic, Brain, Keyboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import Hero from "@/components/landing/Hero";
-import StickyTitle from "@/components/landing/StickyTitle";
 import FeatureSection from "@/components/landing/FeatureSection";
 import { AuthButtons } from "@/components/auth/AuthButtons";
 
@@ -59,13 +58,20 @@ export default function LandingPage() {
         background: "linear-gradient(to bottom, #dbeafe 0%, #d4e4fe 15%, #cdd9fe 30%, #d5d3fe 50%, #ddd6fe 70%, #e4dff8 85%, #ede9fe 100%)",
       }}
     >
-      {/* ─── Login button fixed top-right ─── */}
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110]">
-        <AuthButtons />
-      </div>
+      {/* ─── Header ─── */}
+      <header className="fixed top-0 left-0 right-0 z-[110] flex items-center justify-between px-4 sm:px-6 py-4 sm:py-6 pointer-events-none">
+        <Link
+          href="/"
+          className="text-lg sm:text-xl font-black tracking-tight text-slate-800 hover:text-slate-600 transition-colors pointer-events-auto"
+        >
+          VoiceVault
+        </Link>
+        <div className="pointer-events-auto">
+          <AuthButtons />
+        </div>
+      </header>
 
-      {/* ─── Sticky title (appears after scrolling past hero) ─── */}
-      <StickyTitle />
+
 
       {/* ─── Hero section ─── */}
       <Hero />

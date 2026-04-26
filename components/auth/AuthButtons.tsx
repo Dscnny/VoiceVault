@@ -3,6 +3,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { LogOut, LogIn, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export function AuthButtons() {
   const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0();
@@ -24,18 +25,32 @@ export function AuthButtons() {
 
   if (isAuthenticated) {
     return (
-      <button
-        onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass shadow-sm hover:shadow-md hover:bg-white/80 active:scale-95 transition-all text-sm font-bold text-slate-700"
-      >
-        <LogOut className="w-4 h-4" />
-        Log Out
-      </button>
+      <div className="flex gap-4 items-center">
+        <Link
+          href="/vault"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass shadow-sm hover:shadow-md hover:bg-white/80 active:scale-95 transition-all text-sm font-bold text-slate-700"
+        >
+          Your Vault
+        </Link>
+        <button
+          onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass shadow-sm hover:shadow-md hover:bg-white/80 active:scale-95 transition-all text-sm font-bold text-slate-700"
+        >
+          <LogOut className="w-4 h-4" />
+          Log Out
+        </button>
+      </div>
     );
   }
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 items-center">
+      <Link
+        href="/vault"
+        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass shadow-sm hover:shadow-md hover:bg-white/80 active:scale-95 transition-all text-sm font-bold text-slate-700"
+      >
+        Your Vault
+      </Link>
       <button
         onClick={() => loginWithRedirect({ appState: { returnTo: "/vault" } })}
         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass shadow-sm hover:shadow-md hover:bg-white/80 active:scale-95 transition-all text-sm font-bold text-slate-700"

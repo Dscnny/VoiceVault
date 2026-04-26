@@ -99,7 +99,7 @@ export default function Hero() {
               "0 0 60px rgba(147,197,253,0.5), 0 0 120px rgba(99,102,241,0.3), 0 4px 20px rgba(0,0,0,0.15)",
           }}
         >
-          voicevault
+          VoiceVault
         </h1>
         <motion.p
           className="mt-6 text-lg sm:text-xl text-blue-100/90 font-medium max-w-lg mx-auto"

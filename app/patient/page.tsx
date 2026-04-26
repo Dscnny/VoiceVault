@@ -150,10 +150,9 @@ export default function PatientPage() {
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-2 font-bold text-violet-600 hover:text-fuchsia-600 text-sm transition-colors group"
+            className="inline-flex items-center font-black tracking-tight text-violet-600 hover:text-fuchsia-600 text-lg transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Home
+            VoiceVault
           </Link>
           <div className="flex items-center gap-2.5 text-xs font-bold tabular-nums uppercase tracking-wider">
             <span className={`w-2 h-2 rounded-full ${
