@@ -2,10 +2,10 @@
  * TransformersIntelligenceService — real on-device NLP using transformers.js.
  *
  * Pipeline:
- *  1. DistilBERT sentiment classifier (Xenova/distilbert-base-uncased-finetuned-sst-2-english)
- *     → POSITIVE/NEGATIVE label with confidence, mapped to score in [-1, 1]
- *  2. MiniLM sentence embeddings (Xenova/all-MiniLM-L6-v2) → 384-dim vector
- *  3. Heuristic keyword extraction (TF-style + medical-aware stopwords)
+ * 1. DistilBERT sentiment classifier (Xenova/distilbert-base-uncased-finetuned-sst-2-english)
+ * → POSITIVE/NEGATIVE label with confidence, mapped to score in [-1, 1]
+ * 2. MiniLM sentence embeddings (Xenova/all-MiniLM-L6-v2) → 384-dim vector
+ * 3. Heuristic keyword extraction (TF-style + medical-aware stopwords)
  *
  * All models run in the browser via WebGPU (when available) or WASM fallback.
  * Models are cached after first download.
@@ -17,19 +17,19 @@ import type { IntelligenceService } from "@/services/interfaces/IntelligenceServ
 type Pipeline = (...args: any[]) => Promise<any>;
 
 const STOPWORDS = new Set([
-  "the","a","an","is","was","were","are","be","been","being","i","you","he","she","it","we",
-  "they","my","your","his","her","its","our","their","this","that","these","those","of","in",
-  "on","at","by","for","with","about","against","between","into","through","during","before",
-  "after","above","below","to","from","up","down","out","off","over","under","again","further",
-  "then","once","here","there","when","where","why","how","all","any","both","each","few","more",
-  "most","other","some","such","no","nor","not","only","own","same","so","than","too","very",
-  "s","t","can","will","just","don","should","now","and","but","or","if","because","as","until",
-  "while","do","does","did","have","has","had","having","am","ll","ve","re","m","d","ain",
-  "aren","couldn","didn","doesn","hadn","hasn","haven","isn","ma","mightn","mustn","needn",
-  "shan","shouldn","wasn","weren","won","wouldn","also","really","still","get","got","like",
-  "would","could","one","two","three","four","five","six","seven","eight","nine","ten","today",
-  "yesterday","tomorrow","day","week","month","year","time","know","think","feel","felt","feels",
-  "going","gonna","want","wanted","need","needed","make","made","take","took","taking",
+  "the", "a", "an", "is", "was", "were", "are", "be", "been", "being", "i", "you", "he", "she", "it", "we",
+  "they", "my", "your", "his", "her", "its", "our", "their", "this", "that", "these", "those", "of", "in",
+  "on", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before",
+  "after", "above", "below", "to", "from", "up", "down", "out", "off", "over", "under", "again", "further",
+  "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more",
+  "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very",
+  "s", "t", "can", "will", "just", "don", "should", "now", "and", "but", "or", "if", "because", "as", "until",
+  "while", "do", "does", "did", "have", "has", "had", "having", "am", "ll", "ve", "re", "m", "d", "ain",
+  "aren", "couldn", "didn", "doesn", "hadn", "hasn", "haven", "isn", "ma", "mightn", "mustn", "needn",
+  "shan", "shouldn", "wasn", "weren", "won", "wouldn", "also", "really", "still", "get", "got", "like",
+  "would", "could", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "today",
+  "yesterday", "tomorrow", "day", "week", "month", "year", "time", "know", "think", "feel", "felt", "feels",
+  "going", "gonna", "want", "wanted", "need", "needed", "make", "made", "take", "took", "taking",
 ]);
 
 export class TransformersIntelligenceService implements IntelligenceService {
@@ -54,16 +54,19 @@ export class TransformersIntelligenceService implements IntelligenceService {
       // Dynamic import so transformers.js only loads in the browser
       const { pipeline, env } = await import("@xenova/transformers");
 
+      // Bypass ES module read-only binding for the config object
+      const tEnv = env as any;
+
       // Use the CDN for model files; tell the runtime to cache them.
-      env.allowRemoteModels = true;
-      env.allowLocalModels = false;
-      
+      tEnv.allowRemoteModels = true;
+      tEnv.allowLocalModels = false;
+
       // Fix Next.js App Router Webpack issue with loading WASM dynamically
       // by explicitly pointing to the unpkg/jsdelivr CDN for the runtime files.
-      env.backends.onnx.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/";
-      
+      tEnv.backends.onnx.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/";
+
       // Disable multi-threading/Web Workers to prevent Next.js from throwing the blob dynamic import error
-      env.backends.onnx.wasm.numThreads = 1;
+      tEnv.backends.onnx.wasm.numThreads = 1;
 
       // Try WebGPU first; fall back to WASM if unavailable.
       const device = await detectBestDevice();

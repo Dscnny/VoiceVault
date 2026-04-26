@@ -12,7 +12,7 @@ import type {
 import type { IntakeService } from "@/services/interfaces/IntakeService";
 
 export class MockIntakeService implements IntakeService {
-  async generateCheatSheet(days = 7): Promise<IntakeCheatSheet> {
+  async generateCheatSheet(userId: string, days: number = 30): Promise<IntakeCheatSheet> {
     const endDate = new Date();
     const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
     const ago = (n: number) =>
@@ -56,11 +56,7 @@ export class MockIntakeService implements IntakeService {
     };
   }
 
-  async topKeywords(
-    _startDate: Date,
-    _endDate: Date,
-    limit = 5
-  ): Promise<KeywordCount[]> {
+  async topKeywords(userId: string, startDate: Date, endDate: Date, limit: number = 10): Promise<KeywordCount[]> {
     return [
       { keyword: "anxiety", count: 8 },
       { keyword: "sleep", count: 6 },
@@ -68,7 +64,7 @@ export class MockIntakeService implements IntakeService {
     ].slice(0, limit);
   }
 
-  async sentimentTrend(_startDate: Date, _endDate: Date): Promise<SentimentTrend> {
+  async sentimentTrend(userId: string, startDate: Date, endDate: Date): Promise<SentimentTrend> {
     return "Declining";
   }
 }

@@ -15,6 +15,17 @@ import type {
 
 export class MockStorageService implements StorageService {
   private entries: JournalEntry[] = [];
+  async fetchDossier(userId: string): Promise<any | null> {
+    return Promise.resolve(null);
+  }
+
+  async saveDossier(dossier: any): Promise<void> {
+    return Promise.resolve();
+  }
+
+  async assignAnonymousEntries(userId: string): Promise<void> {
+    return Promise.resolve();
+  }
 
   async save(entry: JournalEntry): Promise<void> {
     const index = this.entries.findIndex((e) => e.id === entry.id);
