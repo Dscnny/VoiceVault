@@ -22,26 +22,19 @@ export default function PatientPage() {
   const [sentiment, setSentiment] = useState<SentimentResult | null>(null);
   const [empathy, setEmpathy] = useState<EmpathyResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [warmupStatus, setWarmupStatus] = useState<"pending" | "ready" | "failed">(
-    "pending"
-  );
+  const [warmupStatus, setWarmupStatus] = useState<"pending" | "ready" | "failed">("pending");
   const controllerRef = useRef<RecordingController | null>(null);
 
-  // Pre-warm the ML models so the first recording isn't slow.
   useEffect(() => {
     let cancelled = false;
     services.intelligence
       .warmup()
-      .then(() => {
-        if (!cancelled) setWarmupStatus("ready");
-      })
+      .then(() => { if (!cancelled) setWarmupStatus("ready"); })
       .catch((e) => {
         console.warn("Intelligence warmup failed", e);
         if (!cancelled) setWarmupStatus("failed");
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [services]);
 
   const reset = () => {
@@ -68,14 +61,24 @@ export default function PatientPage() {
     }
   };
 
-  const stopRecording = async () => {
+  const handlePause = () => {
+    controllerRef.current?.pause?.();
+    setState("paused");
+  };
+
+  const handleResume = () => {
+    controllerRef.current?.resume?.();
+    setState("recording");
+  };
+
+  const finishRecording = async () => {
     const controller = controllerRef.current;
     if (!controller) return;
     setState("processing");
     try {
       const result = await controller.stop();
       controllerRef.current = null;
-      const finalText = result.transcript.trim();
+      const finalText = (transcript || partial).trim();
       setTranscript(finalText);
       setPartial("");
 
@@ -85,15 +88,12 @@ export default function PatientPage() {
         return;
       }
 
-      // Run NLP pipeline
       const sentimentResult = await services.intelligence.analyze(finalText);
       setSentiment(sentimentResult);
 
-      // Generate empathetic nudge
       const empathyResult = await services.empathy.generateResponse(sentimentResult);
       setEmpathy(empathyResult);
 
-      // Persist
       const entry: JournalEntry = {
         id: crypto.randomUUID(),
         timestamp: new Date(),
@@ -114,11 +114,9 @@ export default function PatientPage() {
 
   const handleClick = () => {
     if (state === "idle") return startRecording();
-    if (state === "recording") return stopRecording();
   };
 
   const displayTranscript = transcript || partial;
-  const isLive = state === "recording";
 
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10">
@@ -148,7 +146,13 @@ export default function PatientPage() {
         </div>
 
         <div className="mb-10 flex justify-center">
-          <RecordButton state={state} onClick={handleClick} />
+          <RecordButton
+            state={state}
+            onClick={handleClick}
+            onPause={handlePause}
+            onResume={handleResume}
+            onUpload={finishRecording}
+          />
         </div>
 
         {error && (
@@ -158,9 +162,13 @@ export default function PatientPage() {
           </div>
         )}
 
-        {(displayTranscript || isLive) && (
+        {(displayTranscript || state === "recording" || state === "paused") && (
           <div className="mb-4">
-            <TranscriptDisplay transcript={displayTranscript} isLive={isLive} />
+            <TranscriptDisplay
+              transcript={displayTranscript}
+              isLive={state === "recording"}
+              isPaused={state === "paused"}
+            />
           </div>
         )}
 
