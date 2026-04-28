@@ -1,117 +1,61 @@
-# VoiceVault — Web
+# VoiceVault
 
-The Edge-Computed Clinical Telemetry Engine.
-Hackathon submission for **LA Hacks · Catalyst for Care** track.
+**100% On-Device Clinical NLP & Edge Storage Engine.**
 
-This is the web rebuild of the original iOS prototype. Every architectural
-decision from the Swift codebase is preserved: protocol-oriented services,
-dependency injection via a service container, mock implementations for every
-service, and a strict Patient/Provider split. The implementations now run
-in the browser instead of on iOS.
+VoiceVault is a local-first audio transcription and sentiment analysis engine built for absolute data privacy. Operating entirely within the browser sandbox, the system leverages WebGPU-accelerated transformer models and IndexedDB to deliver clinical-grade NLP without a single network round-trip.
 
-## Why a web app
+Unlike traditional cloud-dependent applications, VoiceVault is architected as an "airgapped" edge compute node. It requires zero server communication, zero API keys, and explicitly enforces a zero-network-hop boundary for all user data.
 
-The original iOS prototype required a Mac for development and a TestFlight
-deploy for any judge to try it. The web version does something the iOS
-version literally couldn't: a judge can install it on their own laptop or
-phone in 5 seconds during judging — and verify the privacy story themselves
-by opening DevTools and watching the Network tab stay empty.
+---
 
-## Stack
+### The Compute Path: Edge Inference & Hardware Delegation
 
-- **Framework:** Next.js 14 (App Router) + TypeScript + Tailwind CSS
-- **Transcription:** Web Speech API (`SpeechRecognition`) — runs in-browser,
-  no audio uploaded
-- **Sentiment + Embeddings:** [`@xenova/transformers`](https://github.com/xenova/transformers.js)
-  running DistilBERT (~65MB) and MiniLM (~25MB) via WebGPU when available,
-  WASM fallback otherwise
-- **Empathy:** Rule-based, mode-aware response engine (deterministic, no LLM)
-- **Persistence:** IndexedDB via [Dexie.js](https://dexie.org)
-- **Charts:** Recharts (sentiment volatility timeline, keyword frequency)
-- **Icons:** Lucide
+The core execution loop bypasses traditional backend processing by running machine learning inference directly against the client's GPU via WebAssembly and WebGPU.
 
-## Architecture
+* **WebGPU Hardware Delegation:** The `TransformersIntelligenceService` initializes by probing the `navigator.gpu` adapter. If available, tensor operations are instantly delegated to the client's local GPU, bypassing the CPU entirely for matrix multiplications. 
+* **Single-Threaded WASM Fallback:** Due to known Webpack/Next.js App Router constraints regarding dynamic WASM blob imports, multi-threading (`numThreads`) is explicitly clamped to `1`. The system intentionally forces execution onto a single thread to guarantee deterministic module loading within the React lifecycle.
+* **Asynchronous Ingress:** Data is ingested via the native Web Speech API. To prevent locking the main thread UI, speech streams are processed via asynchronous `onresult` event callbacks, relying on the V8 engine's microtask queue rather than aggressive polling or spinning.
 
-The Swift codebase's protocol-oriented design ports almost 1:1:
+### Algorithmic Rigor: Clinical Sentiment & Heuristics
 
-```
-Swift                                  →  TypeScript
-─────────────────────────────────────────────────────────────────────────
-Models/JournalEntry.swift              →  types/JournalEntry.ts
-Models/SentimentResult.swift           →  types/SentimentResult.ts
-Protocols/*.swift                      →  services/interfaces/*.ts
-Mocks/Mock*.swift                      →  services/mock/*.ts
-Services/*.swift                       →  services/real/*.ts
-Core/AppEnvironment.swift              →  lib/serviceContainer.tsx
-Views/Patient/                         →  app/patient/ + components/patient/
-Views/Provider/                        →  app/provider/ + components/provider/
-```
+The NLP pipeline is optimized for constrained, client-side execution environments, avoiding heavy generative models in favor of targeted classification heuristics.
 
-Three service modes via `ServiceProvider`:
+* **DistilBERT Classification:** The engine runs a pre-trained DistilBERT model (`Xenova/distilbert-base-uncased-finetuned-sst-2-english`) compiled to WASM. It maps raw inference confidence scores into a normalized $[-1, 1]$ polarity scale (where $-1$ is maximum negative sentiment and $1$ is maximum positive sentiment).
+* **Heuristic Keyword Extraction:** Rather than utilizing computationally expensive Named Entity Recognition (NER), the system implements a Term Frequency (TF)-style heuristic. It executes a rigorous $O(N)$ filter against a hardcoded `Set` of over 100 medical-aware stopwords to isolate high-value clinical terminology in real-time.
 
-- **production**: real services (Web Speech, transformers.js, Dexie)
-- **preview**: all-mock services pre-seeded with 7 medical-grade journal entries
-- **hybrid**: real storage + intake, mocked transcription/intelligence/empathy
+### Memory Architecture & Persistence 
 
-To switch: edit `app/layout.tsx` and change the `mode` prop on `<ServiceProvider>`.
+Because the system operates in a JavaScript environment, explicit zero-allocation (`malloc`/`free`) architectures are impossible. Instead, VoiceVault optimizes for the V8 Garbage Collector and local browser limits.
 
-## Setup
+* **B-Tree Edge Storage:** The `DexieStorageService` replaces external SQL databases with an IndexedDB layer. Data is structured using client-side B-Trees, enabling `O(log N)` time complexity for range queries (e.g., fetching journal entries via `between(startDate, endDate)`).
+* **V8 Memory Management:** The application accepts standard JavaScript AoS (Array of Structs) memory layouts. Memory pressure is delegated to the browser's native garbage collector, with state updates batched into React's render cycles to mitigate GC pause times during active speech transcription.
+
+### The Network Boundary: Zero-I/O
+
+The defining architectural constraint of VoiceVault is its lack of a network layer. 
+
+* **No Binary Protocols:** There are no WebSockets, UDP multicasts, or Server-Sent Events.
+* **Complete Isolation:** Once the initial static assets (HTML/JS/WASM models) are cached by the browser, the application effectively goes offline. All data ingestion, transformer inference, and state persistence execute behind the browser's security sandbox.
+
+### Tech Stack
+
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Frontend Shell** | Next.js 14 (App Router) + React | UI rendering and asynchronous event management. |
+| **Inference Engine** | Transformers.js (WebGPU/WASM) | Local execution of DistilBERT sentiment models. |
+| **Ingress** | Web Speech API | Native browser audio capture and transcription. |
+| **Persistence** | Dexie.js (IndexedDB) | Relational, zero-network edge database. |
+| **Language** | TypeScript | Strict type enforcement across service boundaries. |
+
+### Getting Started
+
+Because VoiceVault is an edge-compute application, the "backend" is entirely bundled into the client execution environment.
 
 ```bash
+# Clone and install dependencies
+git clone [https://github.com/daohhuynh/voicevault.git](https://github.com/daohhuynh/voicevault.git)
+cd voicevault
 npm install
+
+# Boot the local edge environment
 npm run dev
-# open http://localhost:3000
-```
-
-First load downloads ~90MB of ML models. They're cached aggressively after
-that. For faster iteration during UI development, use `mode="preview"` to skip
-model downloads entirely.
-
-## Browser support
-
-- **Recommended for demo:** Chrome or Edge desktop. WebGPU acceleration + the
-  best Web Speech support.
-- **Safari:** Web Speech API works but is less reliable. WebGPU is gated.
-  transformers.js falls back to WASM.
-- **PWA install:** works on Chrome (desktop + Android), Safari iOS via "Add to
-  Home Screen."
-
-## Demo flow
-
-1. Open the app. Optionally turn on airplane mode to prove the privacy story.
-2. Click "Patient Vault" → tap the mic → speak for ~30 seconds.
-3. Watch the live transcript appear (on-device speech recognition).
-4. Stop the recording → DistilBERT scores sentiment, MiniLM produces an
-   embedding, the rule-based engine generates a nudge.
-5. Switch to "Provider Dashboard." First time, click "Seed sample clinical
-   data" to load the 7 medical-grade fake entries.
-6. Show the sentiment volatility chart, keyword frequencies, flagged quotes,
-   and the trend badge.
-7. Open DevTools → Network tab. Show that nothing was sent to a server.
-
-## Team task split (24-hour sprint)
-
-- **Dev 1 — Systems Integrator:** `services/real/WebSpeechTranscriptionService.ts`,
-  `lib/serviceContainer.tsx`, error handling & permissions UX
-- **Dev 2 — Brain:** `services/real/TransformersIntelligenceService.ts`,
-  `services/real/DexieStorageService.ts`, `services/real/RealIntakeService.ts`,
-  models in `types/`
-- **Dev 3 — Patient UI:** `app/patient/page.tsx`, `components/patient/*`
-- **Dev 4 — Provider UI:** `app/provider/page.tsx`, `components/provider/*`
-
-The mocks are pre-seeded so UI devs can build against realistic data
-immediately while the real services come online.
-
-## What was deliberately cut from the iOS plan
-
-- **Apple Intelligence empathy:** swapped for rule-based responses. Stretch
-  goal: WebLLM + Phi-3-mini for true generative nudges.
-- **Temporal RAG:** embeddings are computed and stored, but no semantic search
-  UI. Foundation is there if time allows.
-
-## Risks
-
-- First-load model download is ~90MB. Pre-warm before judging by opening the
-  patient page once on the demo machine.
-- WebGPU isn't available everywhere; the WASM fallback is slower but works.
-- Web Speech API varies by browser — demo on Chrome.
